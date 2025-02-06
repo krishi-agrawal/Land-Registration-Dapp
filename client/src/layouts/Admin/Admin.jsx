@@ -1,6 +1,6 @@
 import React from "react";
-import { Route, Switch, Redirect, useLocation } from "react-router-dom";
-// import PerfectScrollbar from "perfect-scrollbar";
+import { Route, Routes, Navigate, useLocation } from "react-router-dom";
+import PerfectScrollbar from "perfect-scrollbar";
 import { ethers } from "ethers"; // Import Ethers.js
 
 // Core Components
@@ -8,8 +8,8 @@ import AdminNavbar from "../../components/Navbars/AdminNavbar";
 import Footer from "../../components/Footer/Footer";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import FixedPlugin from "../../components/FixedPlugin/FixedPlugin";
-// import Dashboard from "../../views/Dashboard";
-// import routes from "../../routes";
+import Dashboard from "../../views/Dashboard";
+import routes from "../../routes";
 
 import logo from "../../assets/img/react-logo.png";
 import { BackgroundColorContext } from "../../contexts/BackgroundColorContext";
@@ -123,10 +123,10 @@ function Admin(props) {
 
               {/* Main Content */}
               <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-200 p-6">
-                <Switch>
+                <Routes>
                   {getRoutes(routes)}
-                  {/* <Redirect from="*" to="/admin/dashboard" /> */}
-                </Switch>
+                  <Navigate to="/admin/dashboard" replace />
+                </Routes>
               </main>
 
               {/* Footer */}
