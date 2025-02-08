@@ -1,5 +1,10 @@
 @import "tailwindcss";
 @import url('https://fonts.googleapis.com/css?family=Fira+Sans:400,500,600,700,800');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
 
 
 * {
@@ -346,3 +351,6 @@ body, html, .App, #root, .auth-wrapper {
 #rejected{
   color:red;
 }
+
+
+
