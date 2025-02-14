@@ -1,5 +1,5 @@
 import React from "react";
-import { Route, Switch, Redirect, useLocation } from "react-router-dom";
+import { Route, Routes, Navigate, useLocation } from "react-router-dom";
 import PerfectScrollbar from "perfect-scrollbar";
 
 // Core components
@@ -12,31 +12,29 @@ import routes from "../../routes";
 import logo from "../../assets/img/react-logo.png";
 import { BackgroundColorContext } from "../../contexts/BackgroundColorContext";
 
-var ps;
-
-function Land(props) {
+function Land() {
   const location = useLocation();
   const mainPanelRef = React.useRef(null);
+  const psRef = React.useRef(null);
   const [sidebarOpened, setsidebarOpened] = React.useState(
-    document.documentElement.className.indexOf("nav-open") !== -1
+    document.documentElement.classList.contains("nav-open")
   );
 
   React.useEffect(() => {
     if (navigator.platform.indexOf("Win") > -1) {
-      document.documentElement.className += " perfect-scrollbar-on";
+      document.documentElement.classList.add("perfect-scrollbar-on");
       document.documentElement.classList.remove("perfect-scrollbar-off");
-      ps = new PerfectScrollbar(mainPanelRef.current, {
-        suppressScrollX: true,
+
+      psRef.current = new PerfectScrollbar(mainPanelRef.current, { suppressScrollX: true });
+
+      document.querySelectorAll(".table-responsive").forEach((table) => {
+        new PerfectScrollbar(table);
       });
-      let tables = document.querySelectorAll(".table-responsive");
-      for (let i = 0; i < tables.length; i++) {
-        ps = new PerfectScrollbar(tables[i]);
-      }
     }
-    // Specify how to clean up after this effect:
-    return function cleanup() {
-      if (navigator.platform.indexOf("Win") > -1) {
-        ps.destroy();
+
+    return () => {
+      if (navigator.platform.indexOf("Win") > -1 && psRef.current) {
+        psRef.current.destroy();
         document.documentElement.classList.add("perfect-scrollbar-off");
         document.documentElement.classList.remove("perfect-scrollbar-on");
       }
@@ -44,28 +42,18 @@ function Land(props) {
   }, []);
 
   React.useEffect(() => {
-    if (navigator.platform.indexOf("Win") > -1) {
-      let tables = document.querySelectorAll(".table-responsive");
-      for (let i = 0; i < tables.length; i++) {
-        ps = new PerfectScrollbar(tables[i]);
-      }
-    }
-    document.documentElement.scrollTop = 0;
-    document.scrollingElement.scrollTop = 0;
-    if (mainPanelRef.current) {
-      mainPanelRef.current.scrollTop = 0;
-    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, [location]);
 
   const toggleSidebar = () => {
     document.documentElement.classList.toggle("nav-open");
-    setsidebarOpened(!sidebarOpened);
+    setsidebarOpened((prev) => !prev);
   };
 
   return (
     <BackgroundColorContext.Consumer>
       {({ color, changeColor }) => (
-        <React.Fragment>
+        <>
           <div className="wrapper flex h-screen bg-gray-100">
             <Sidebar
               routes={routes}
@@ -79,15 +67,15 @@ function Land(props) {
             <div className="main-panel flex-1 flex flex-col overflow-hidden" ref={mainPanelRef} data={color}>
               <AdminNavbar />
               <div className="flex-1 overflow-y-auto p-6 bg-gradient-to-r from-blue-50 to-purple-50">
-                <Switch>
-                  <Route path="/admin/AddLand" component={AddLand} />
-                  <Redirect from="*" to="/admin/AddLand" />
-                </Switch>
+                <Routes>
+                  <Route path="/admin/AddLand" element={<AddLand />} />
+                  <Route path="*" element={<Navigate to="/admin/AddLand" />} />
+                </Routes>
               </div>
             </div>
           </div>
           <FixedPlugin bgColor={color} handleBgClick={changeColor} />
-        </React.Fragment>
+        </>
       )}
     </BackgroundColorContext.Consumer>
   );
