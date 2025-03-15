@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
-import Registry from "../../artifacts/contracts/Registry.sol/Registry.json"
+import Registry from "../artifacts/contracts/Registry.sol/Registry.json"
 
 const RegisterBuyer = () => {
   const [account, setAccount] = useState(null);
