@@ -49,7 +49,7 @@ const SellerInfo = () => {
         
         const landContractInstance = new ethers.Contract(
           "0x273d42dE3e74907cD70739f58DC717dF2872F736",
-          Registry.abi,
+          Registry.abi,  
           ethersSigner
         );
         setLandContract(landContractInstance);

@@ -7,8 +7,10 @@ import AdminLayout from "./layouts/Admin/Admin.jsx";
 import RegisterSeller from "./RegisterSeller.jsx";
 import VantaGlobe from "./views/VantaGlobe.jsx";
 import ApproveRequest from "./views/ApproveRequest.jsx";
-import AddLandd from "./layouts/Admin/AddLandd.jsx";
+import AddLand from "./layouts/Admin/AddLand.jsx";
 import SellerInfo from "./SellerInfo.jsx"
+import SellerDashboard from "./views/SellerDashboard.jsx";
+import Dashboard from "./views/Dashboard.jsx";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -21,8 +23,10 @@ function App() {
           <Route path="/Vanta" element={<VantaGlobe />} />
            <Route path="/RegisterBuyer" element={<RegisterBuyer />} />
           <Route path="/RegisterSeller" element={<RegisterSeller />} />
-          <Route path="/addLand" element={<AddLandd />} />
+          <Route path="/addLand" element={<AddLand />} />
           <Route path="/SellerInfo" element={<SellerInfo />} />
+          <Route path="/SellerDashboard" element={<SellerDashboard />} />
+          <Route path="/Dashboard" element={<Dashboard />} />
           <Route path="/admin" render={(props) => <AdminLayout {...props} />} />
           <Route path="/approve" element={<ApproveRequest />} />
           <Route path="/LI" render={(props) => <LI {...props} />} /> 

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Registry from "../../../artifacts/contracts/Registry.sol/Registry.json";
-// import ipfs from "../ipfs";
 import {
   Button,
   Card,
@@ -15,16 +15,17 @@ import {
   Col,
 } from "reactstrap";
 import { Spinner } from "react-bootstrap";
-// import "bootstrap/dist/css/bootstrap.min.css";
+import { toast } from "react-toastify";
 
 const AddLand = () => {
   const [landInstance, setLandInstance] = useState(null);
   const [account, setAccount] = useState(null);
-  const [verified, setVerified] = useState(false);
-  const [registered, setRegistered] = useState(false);
+  const [verified, setVerified] = useState(true);
+  const [registered, setRegistered] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [uploadLoading, setUploadLoading] = useState(false);
+  const [transactionLoading, setTransactionLoading] = useState(false);
   const [signer, setSigner] = useState(null);
-  const [contract, setContract] = useState(null);
   const [provider, setProvider] = useState(null);
 
   const [area, setArea] = useState("");
@@ -33,18 +34,56 @@ const AddLand = () => {
   const [price, setPrice] = useState("");
   const [propertyPID, setPropertyPID] = useState("");
   const [surveyNum, setSurveyNum] = useState("");
-  const [buffer, setBuffer] = useState(null);
-  const [buffer2, setBuffer2] = useState(null);
+  const [landImage, setLandImage] = useState(null);
+  const [aadharDocument, setAadharDocument] = useState(null);
+  const [imageUrl, setImageUrl] = useState("");
+  const [documentUrl, setDocumentUrl] = useState("");
 
   const navigate = useNavigate();
 
-    useEffect(() => {
+  // Pinata Configuration
+  const apiKey = '3df76883d3f7b0b7bf14';
+  const apiSecret = '318a60d3bf31978bd8bd9bb490e2153201e5600efdbf49ac167aa15cc2ca7dfb';
+  const pinataBaseUrl = 'https://api.pinata.cloud/pinning/pinFileToIPFS';
+
+  const uploadToPinata = async (file, fileName) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const metadata = JSON.stringify({
+      name: fileName,
+    });
+    formData.append('pinataMetadata', metadata);
+
+    const options = JSON.stringify({
+      cidVersion: 0,
+    });
+    formData.append('pinataOptions', options);
+
+    try {
+      const response = await axios.post(pinataBaseUrl, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          pinata_api_key: apiKey,
+          pinata_secret_api_key: apiSecret,
+        },
+      });
+      return `https://gateway.pinata.cloud/ipfs/${response.data.IpfsHash}`;
+    } catch (error) {
+      console.error('Error uploading to Pinata:', error);
+      toast.error('File upload failed');
+      throw error;
+    }
+  };
+
+  useEffect(() => {
     if (window.ethereum) {
       const ethersProvider = new ethers.providers.Web3Provider(window.ethereum);
       setProvider(ethersProvider);
-      connectWallet()
+      console.log("Provider set:", ethersProvider);
     } else {
-      alert("Please install MetaMask!");
+      toast.error("Please install MetaMask!");
+      console.error("MetaMask not detected");
     }
   }, []);
 
@@ -55,194 +94,270 @@ const AddLand = () => {
         const ethersSigner = provider.getSigner();
         setSigner(ethersSigner);
         setAccount(accounts[0]);
+        console.log("Account set:", accounts[0]);
 
         const contractInstance = new ethers.Contract(
-          "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+          "0x273d42dE3e74907cD70739f58DC717dF2872F736",
           Registry.abi,
           ethersSigner
         );
-        setContract(contractInstance);
+        setLandInstance(contractInstance);
+        console.log("Contract instance set:", contractInstance);
+
+        // Check verification status
+        // const isVerified = await contractInstance.SellerVerification(accounts[0]);
+        // const isRegistered = await contractInstance.RegisteredSellerMapping(accounts[0]);
+        
+        // setVerified(isVerified);
+        // setRegistered(isRegistered);
+        setLoading(false);
+        // console.log("Verification status:", isRegistered);
       } catch (error) {
         console.error("Error connecting wallet:", error);
+        setLoading(false);
       }
     }
   };
 
-//   useEffect(() => {
-//     const init = async () => {
-//       try {
-//         const provider = new ethers.providers.Web3Provider(window.ethereum);
-//         const signer = provider.getSigner();
-//         const userAccount = await signer.getAddress();
+  const uploadFiles = async () => {
+    if (!landImage || !aadharDocument) {
+      toast.warn("Please select both land image and Aadhar document");
+      return;
+    }
 
-//         const network = await provider.getNetwork();
-//         const deployedNetwork = LandContract.networks[network.chainId];
+    setUploadLoading(true);
 
-//         const contractInstance = new ethers.Contract(
-//           "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-//           LandContract.abi,
-//           signer
-//         );
+    try {
+      const imageHash = await uploadToPinata(landImage, 'land_image.jpg');
+      const documentHash = await uploadToPinata(aadharDocument, 'aadhar_document1.pdf');
 
-//         const [isVerified, isSeller] = await Promise.all([
-//           contractInstance.isVerified(userAccount),
-//           contractInstance.isSeller(userAccount),
-//         ]);
+      setImageUrl(imageHash);
+      setDocumentUrl(documentHash);
 
-//         setLandInstance(contractInstance);
-//         setAccount(userAccount);
-//         setVerified(isVerified);
-//         setRegistered(isSeller);
-//         setLoading(false);
-//       } catch (error) {
-//         console.error("Initialization error:", error);
-//         alert("Failed to load contract. Check console for details.");
-//       }
-//     };
+      toast.success('Files uploaded successfully');
+      setUploadLoading(false);
+      return { imageHash, documentHash };
+    } catch (error) {
+      setUploadLoading(false);
+      return null;
+    }
+  };
 
-//     init();
-//   }, []);
+  const addLand = async () => {
+    // Validate inputs
+    if (!area || !city || !stateLoc || !price || !propertyPID || !surveyNum) {
+      toast.warn("All fields are required!");
+      return;
+    }
 
-//   const captureFile = (event, isDocument = false) => {
-//     event.preventDefault();
-//     const file = event.target.files[0];
-//     const reader = new FileReader();
-//     reader.readAsArrayBuffer(file);
-//     reader.onloadend = () => {
-//       const bufferData = new Uint8Array(reader.result);
-//       isDocument ? setBuffer2(bufferData) : setBuffer(bufferData);
-//     };
-//   };
+    if (isNaN(area) || isNaN(price)) {
+      toast.warn("Land area and price must be numbers!");
+      return;
+    }
 
-// //   const uploadToIPFS = async (buffer) => {
-// //     try {
-// //       const result = await ipfs.files.add(buffer);
-// //       return result[0].hash;
-// //     } catch (error) {
-// //       console.error("IPFS upload error:", error);
-// //       alert("Error uploading to IPFS.");
-// //       return null;
-// //     }
-// //   };
+    if (!imageUrl || !documentUrl) {
+      toast.warn("Please upload land image and Aadhar document first!");
+      return;
+    }
 
-//   const addLand = async () => {
-//     if (!area || !city || !stateLoc || !price || !propertyPID || !surveyNum || !buffer || !buffer2) {
-//       alert("All fields are required!");
-//       return;
-//     }
+    setTransactionLoading(true);
 
-//     if (isNaN(area) || isNaN(price)) {
-//       alert("Land area and price must be numbers!");
-//       return;
-//     }
+    try {
+      // Convert price to wei
+      const priceInWei = ethers.utils.parseEther(price);
 
-//     try {
-//       const [ipfsHash, documentHash] = await Promise.all([
-//         // uploadToIPFS(buffer),
-//         // uploadToIPFS(buffer2),
-//       ]);
+      // Call contract method
+      const tx = await landInstance.addLand(
+        parseInt(area),
+        city,
+        stateLoc,
+        priceInWei,
+        parseInt(propertyPID),
+        parseInt(surveyNum),
+        imageUrl,
+        documentUrl
+      );
 
-//       if (!ipfsHash || !documentHash) return;
+      await tx.wait();
+      toast.success("Land added successfully!");
+      navigate("/");
+    } catch (error) {
+      console.error("Error adding land:", error);
+      toast.error("Transaction failed: " + error.message);
+    } finally {
+      setTransactionLoading(false);
+    }
+  };
 
-//       const tx = await landInstance.addLand(
-//         area,
-//         city,
-//         stateLoc,
-//         ethers.utils.parseEther(price),
-//         propertyPID,
-//         surveyNum,
-//         ipfsHash,
-//         documentHash,
-//         { from: account, gasLimit: 2100000 }
-//       );
+  const handleLandImageUpload = (event) => {
+    const file = event.target.files[0];
+    setLandImage(file);
+  };
 
-//       await tx.wait();
-//       alert("Land added successfully!");
-//       navigate("/Seller/SellerDashboard");
-//     } catch (error) {
-//       console.error("Error adding land:", error);
-//       alert("Transaction failed.");
-//     }
-//   };
+  const handleAadharDocumentUpload = (event) => {
+    const file = event.target.files[0];
+    setAadharDocument(file);
+  };
 
-//   if (loading) {
-//     return (
-//       <div className="d-flex justify-content-center align-items-center vh-100">
-//         <Spinner animation="border" variant="primary" />
-//       </div>
-//     );
-//   }
-
-//   if (!registered || !verified) {
-//     return (
-//       <div className="content">
-//         <Row>
-//           <Col xs="6">
-//             <Card className="card-chart">
-//               <CardBody>
-//                 <h1>You are not verified to view this page</h1>
-//               </CardBody>
-//             </Card>
-//           </Col>
-//         </Row>
-//       </div>
-//     );
-//   }
-const addLand = () => {
-
-}
-const captureFile = () => {
-
-}
 
   return (
-    <div className="content">
-      <Row>
-        <Col md="8">
-          <Card>
-            <CardHeader>
-              <h5 className="title">Add Land</h5>
-            </CardHeader>
-            <CardBody>
-              <FormGroup>
-                <label>Area (sqm)</label>
-                <Input type="text" value={area} onChange={(e) => setArea(e.target.value)} />
-              </FormGroup>
-              <FormGroup>
-                <label>City</label>
-                <Input type="text" value={city} onChange={(e) => setCity(e.target.value)} />
-              </FormGroup>
-              <FormGroup>
-                <label>State</label>
-                <Input type="text" value={stateLoc} onChange={(e) => setStateLoc(e.target.value)} />
-              </FormGroup>
-              <FormGroup>
-                <label>Price (ETH)</label>
-                <Input type="text" value={price} onChange={(e) => setPrice(e.target.value)} />
-              </FormGroup>
-              <FormGroup>
-                <label>Property PID</label>
-                <Input type="text" value={propertyPID} onChange={(e) => setPropertyPID(e.target.value)} />
-              </FormGroup>
-              <FormGroup>
-                <label>Survey Number</label>
-                <Input type="text" value={surveyNum} onChange={(e) => setSurveyNum(e.target.value)} />
-              </FormGroup>
-              <FormGroup>
-                <label>Upload Land Image</label>
-                <Input type="file" onChange={(e) => captureFile(e)} />
-              </FormGroup>
-              <FormGroup>
-                <label>Upload Aadhar Card</label>
-                <Input type="file" onChange={(e) => captureFile(e, true)} />
-              </FormGroup>
-            </CardBody>
-            <CardFooter>
-              <Button color="primary" onClick={addLand}>Add Land</Button>
-            </CardFooter>
-          </Card>
-        </Col>
-      </Row>
+    <div className="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
+      <div className="relative py-3 sm:max-w-xl sm:mx-auto">
+        <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-light-blue-500 shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 sm:rounded-3xl"></div>
+        <div className="relative px-4 py-10 bg-white shadow-lg sm:rounded-3xl sm:p-20">
+          <div className="max-w-md mx-auto">
+            {!account ? (
+              <button
+                onClick={connectWallet}
+                className="w-full bg-gray-800 text-white py-2 px-4 rounded-md hover:bg-gray-700 mb-4"
+              >
+                Connect to MetaMask
+              </button>
+            ) : (
+              <p className="text-green-600 text-center mb-4">
+                Wallet Connected: {account.slice(0, 6)}...{account.slice(-4)}
+              </p>
+            )}
+
+            {!registered || !verified ? (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <strong className="font-bold">Access Denied! </strong>
+                <span className="block sm:inline">You are not verified to add land.</span>
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-200">
+                <div className="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
+                  <div className="flex flex-col">
+                    <label className="leading-loose">Area (sqm)</label>
+                    <Input 
+                      type="text" 
+                      value={area} 
+                      onChange={(e) => setArea(e.target.value)} 
+                      className="px-4 py-2 border focus:ring-gray-500 focus:border-gray-900 w-full sm:text-sm border-gray-300 rounded-md focus:outline-none text-gray-600"
+                    />
+                  </div>
+                  
+                  <div className="flex flex-col">
+                    <label className="leading-loose">City</label>
+                    <Input 
+                      type="text" 
+                      value={city} 
+                      onChange={(e) => setCity(e.target.value)} 
+                      className="px-4 py-2 border focus:ring-gray-500 focus:border-gray-900 w-full sm:text-sm border-gray-300 rounded-md focus:outline-none text-gray-600"
+                    />
+                  </div>
+
+                  <div className="flex flex-col">
+                    <label className="leading-loose">State</label>
+                    <Input 
+                      type="text" 
+                      value={stateLoc} 
+                      onChange={(e) => setStateLoc(e.target.value)} 
+                      className="px-4 py-2 border focus:ring-gray-500 focus:border-gray-900 w-full sm:text-sm border-gray-300 rounded-md focus:outline-none text-gray-600"
+                    />
+                  </div>
+
+                  <div className="flex flex-col">
+                    <label className="leading-loose">Price (ETH)</label>
+                    <Input 
+                      type="text" 
+                      value={price} 
+                      onChange={(e) => setPrice(e.target.value)} 
+                      className="px-4 py-2 border focus:ring-gray-500 focus:border-gray-900 w-full sm:text-sm border-gray-300 rounded-md focus:outline-none text-gray-600"
+                    />
+                  </div>
+
+                  <div className="flex flex-col">
+                    <label className="leading-loose">Property PID</label>
+                    <Input 
+                      type="text" 
+                      value={propertyPID} 
+                      onChange={(e) => setPropertyPID(e.target.value)} 
+                      className="px-4 py-2 border focus:ring-gray-500 focus:border-gray-900 w-full sm:text-sm border-gray-300 rounded-md focus:outline-none text-gray-600"
+                    />
+                  </div>
+
+                  <div className="flex flex-col">
+                    <label className="leading-loose">Survey Number</label>
+                    <Input 
+                      type="text" 
+                      value={surveyNum} 
+                      onChange={(e) => setSurveyNum(e.target.value)} 
+                      className="px-4 py-2 border focus:ring-gray-500 focus:border-gray-900 w-full sm:text-sm border-gray-300 rounded-md focus:outline-none text-gray-600"
+                    />
+                  </div>
+
+                  <div className="flex flex-col">
+                    <label className="leading-loose">Upload Land Image</label>
+                    <div className="flex space-x-2">
+                      <Input 
+                        type="file" 
+                        onChange={handleLandImageUpload} 
+                        className="px-4 py-2 border focus:ring-gray-500 focus:border-gray-900 w-full sm:text-sm border-gray-300 rounded-md focus:outline-none text-gray-600"
+                      />
+                      <button 
+                        onClick={uploadFiles} 
+                        disabled={!landImage || uploadLoading}
+                        className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:opacity-50"
+                      >
+                        {uploadLoading ? 'Uploading...' : 'Upload Image'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col">
+                    <label className="leading-loose">Upload Aadhar Card</label>
+                    <div className="flex space-x-2">
+                      <Input 
+                        type="file" 
+                        onChange={handleAadharDocumentUpload} 
+                        className="px-4 py-2 border focus:ring-gray-500 focus:border-gray-900 w-full sm:text-sm border-gray-300 rounded-md focus:outline-none text-gray-600"
+                      />
+                      <button 
+                        onClick={uploadFiles} 
+                        disabled={!aadharDocument || uploadLoading}
+                        className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:opacity-50"
+                      >
+                        {uploadLoading ? 'Uploading...' : 'Upload Document'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4 flex items-center space-x-4">
+                  <button 
+                    onClick={addLand} 
+                    disabled={transactionLoading}
+                    className="bg-blue-500 flex justify-center items-center w-full text-white px-4 py-3 rounded-md focus:outline-none hover:bg-blue-600"
+                  >
+                    {transactionLoading ? (
+                      <svg 
+                        className="animate-spin h-5 w-5 mr-3" 
+                        viewBox="0 0 24 24"
+                      >
+                        <circle 
+                          className="opacity-25" 
+                          cx="12" 
+                          cy="12" 
+                          r="10" 
+                          stroke="currentColor" 
+                          strokeWidth="4"
+                        ></circle>
+                        <path 
+                          className="opacity-75" 
+                          fill="currentColor" 
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>) : (
+                      "Add Land"
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
