@@ -120,17 +120,17 @@ const SellerInfo = () => {
     } catch (error) {
       console.error("Error loading seller data:", error);
       alert("Failed to load seller information");
-    } finally {
+    } finally { 
       setLoading(false);
     }
-  };
-  
+  }; 
+   
 
   // Verify a seller
   const verifySeller = async (address) => {
     try {
       setProcessingTx(true);
-      console.log("Land contract in Verify Seller: ", landContract)
+      console.log("Land contract in Verify Seller: ", landContract) 
       const tx = await landContract.verifySeller(address, {
         from: account,
         // gasLimit: 2100000

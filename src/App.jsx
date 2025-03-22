@@ -11,6 +11,8 @@ import AddLand from "./layouts/Admin/AddLand.jsx";
 import SellerInfo from "./SellerInfo.jsx"
 import SellerDashboard from "./views/SellerDashboard.jsx";
 import Dashboard from "./views/Dashboard.jsx";
+import UpdateBuyer from "./views/UpdateBuyer.jsx"; 
+import ViewImage from "./views/ViewImage.jsx";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -26,7 +28,10 @@ function App() {
           <Route path="/addLand" element={<AddLand />} />
           <Route path="/SellerInfo" element={<SellerInfo />} />
           <Route path="/SellerDashboard" element={<SellerDashboard />} />
+          <Route path="/SellerDashBoard/viewImage" element={<ViewImage />} />
           <Route path="/Dashboard" element={<Dashboard />} />
+          <Route path="/UpdateBuyer" element={<UpdateBuyer />} />
+
           <Route path="/admin" render={(props) => <AdminLayout {...props} />} />
           <Route path="/approve" element={<ApproveRequest />} />
           <Route path="/LI" render={(props) => <LI {...props} />} /> 

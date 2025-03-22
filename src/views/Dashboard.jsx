@@ -37,7 +37,7 @@ const Dashboard = () => {
         const accounts = await provider.send("eth_requestAccounts", []);
         const ethersSigner = provider.getSigner();
         setSigner(ethersSigner);
-        setAccount(accounts[0]);
+        setAccount(accounts[0]); 
 
         const contractInstance = new ethers.Contract(
           "0x273d42dE3e74907cD70739f58DC717dF2872F736", // Using the contract address from your code
@@ -64,7 +64,7 @@ const Dashboard = () => {
   }, []);
 
   const loadContractData = async (contractInstance, currentAccount) => {
-    try {
+    try {  
       // Check if user is registered and verified
       const isRegistered = await contractInstance.isBuyer(currentAccount);
       setRegistered(isRegistered);
@@ -124,23 +124,46 @@ const Dashboard = () => {
           owner: landOwners[i],
           isRequested
         });
-      }
+      } 
       
       setLandData(lands);
     } catch (error) {
       console.error("Error loading land data:", error);
     }
-  };
-
+  }; 
+ 
   const requestLand = async (sellerAddress, landId) => { 
     try {
-      const tx = await contract.requestLand(sellerAddress, landId);
+      // Add logging to debug the parameters
+      console.log("Requesting land with params:", {
+        sellerAddress,
+        landId,
+        buyerAddress: account
+      });
+      console.log("isbuyer: ", registered)
+       
+      // Try setting a manual gas limit to bypass the estimation error
+      const tx = await contract.requestLand(sellerAddress, landId, {
+        gasLimit: 300000 // Set a reasonable gas limit manually
+      });
+       
+      console.log("Transaction submitted:", tx.hash);
       await tx.wait();
       
+      console.log("Transaction confirmed");
       // Reload the page after transaction is confirmed
       window.location.reload();
     } catch (error) {
       console.error("Error requesting land:", error);
+      
+      // More detailed error reporting
+      if (error.reason) { 
+        alert(`Transaction failed: ${error.reason}`);
+      } else if (error.message && error.message.includes("execution reverted")) {
+        alert("Transaction reverted by the contract. You may not have permission or the land may not be available.");
+      } else { 
+        alert("Failed to request land. Check the console for details.");
+      }
     }
   };
 
@@ -152,7 +175,7 @@ const Dashboard = () => {
         </div>
       </div>
     );
-  }
+  } 
 
   // if (!registered) {
   //   return (

@@ -34,7 +34,7 @@ const SDash = () => {
   useEffect(() => {
     if (window.ethereum) {
       const ethersProvider = new ethers.providers.Web3Provider(window.ethereum);
-      setProvider(ethersProvider);
+      setProvider(ethersProvider);  
       connectWallet();
     } else {
       alert("Please install MetaMask!");
@@ -291,18 +291,18 @@ const SDash = () => {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table> 
         </div>
       </div>
 
-      {/* View Images Card */}
+      {/* View Images Card */} 
       <div className="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
         <div className="p-5 border-b border-gray-200">
           <h5 className="text-xl font-semibold text-gray-800">View Images of all Lands!</h5>
         </div>
         <div className="p-5">
           <Link 
-            to="/Seller/viewImage" 
+            to="/SellerDashBoard/viewImage" 
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded block text-center transition duration-300"
           >
             View Images
