@@ -1,26 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { ethers } from "ethers";
 import Land from "../../artifacts/contracts/Registry.sol/Registry.json";
 
-const UpdateBuyer = () => {
+const BuyerProfile = () => {
   // States
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
   const [account, setAccount] = useState(null);
   const [contract, setContract] = useState(null);
-  const [address, setAddress] = useState("");
-  const [name, setName] = useState("");
-  const [age, setAge] = useState("");
-  const [city, setCity] = useState("");
-  const [email, setEmail] = useState("");
-  const [aadharNumber, setAadharNumber] = useState("");
-  const [panNumber, setPanNumber] = useState("");
+  const [buyer, setBuyer] = useState(null);
   const [verified, setVerified] = useState(false);
   const [rejected, setRejected] = useState(false);
   const [loading, setLoading] = useState(true);
-
-  const navigate = useNavigate();
 
   // Using your provided MetaMask auth code
   useEffect(() => {
@@ -41,10 +33,6 @@ const UpdateBuyer = () => {
         setSigner(ethersSigner);
         setAccount(accounts[0]);
 
-        // Set current address
-        const currentAddress = accounts[0];
-        setAddress(currentAddress);
-
         const contractInstance = new ethers.Contract(
           "0x273d42dE3e74907cD70739f58DC717dF2872F736", // Using the contract address from your code
           Land.abi,
@@ -53,7 +41,7 @@ const UpdateBuyer = () => {
         setContract(contractInstance);
 
         // Load buyer data after contract is initialized
-        await loadBuyerData(contractInstance, currentAddress);
+        await loadBuyerData(contractInstance, accounts[0]);
       } catch (error) {
         console.error("Error connecting wallet:", error);
         setLoading(false);
@@ -79,16 +67,21 @@ const UpdateBuyer = () => {
       setRejected(isRejected);
 
       // Get buyer details
-      const buyer = await contractInstance.getBuyerDetails(currentAddress);
-      console.log("Buyer details:", buyer);
+      const buyerDetails = await contractInstance.getBuyerDetails(
+        currentAddress
+      );
+      console.log("Buyer details:", buyerDetails);
 
-      // Update state with buyer details
-      setName(buyer[0]);
-      setCity(buyer[1]);
-      setPanNumber(buyer[2]);
-      setEmail(buyer[4]);
-      setAge(buyer[5]);
-      setAadharNumber(buyer[6]);
+      setBuyer({
+        name: buyerDetails[0],
+        city: buyerDetails[1],
+        panNumber: buyerDetails[2],
+        document: buyerDetails[3],
+        email: buyerDetails[4],
+        age: buyerDetails[5],
+        aadharNumber: buyerDetails[6],
+        walletAddress: currentAddress,
+      });
 
       setLoading(false);
     } catch (error) {
@@ -97,46 +90,14 @@ const UpdateBuyer = () => {
     }
   };
 
-  const updateBuyer = async () => {
-    if (
-      name === "" ||
-      age === "" ||
-      city === "" ||
-      email === "" ||
-      aadharNumber === "" ||
-      panNumber === ""
-    ) {
-      alert("All the fields are compulsory!");
-    } else if (aadharNumber.length !== 12) {
-      alert("Aadhar Number should be 12 digits long!");
-    } else if (panNumber.length !== 10) {
-      alert("Pan Number should be 10 digit alphanumeric number");
-    } else if (!Number(age)) {
-      alert("Your age must be a number");
-    } else {
-      try {
-        const tx = await contract.updateBuyer(
-          name,
-          age,
-          city,
-          aadharNumber,
-          email,
-          panNumber
-        );
-
-        await tx.wait();
-
-        // Navigate to profile after successful update
-        navigate("/buyerProfile");
-
-        // Reload the page
-        window.location.reload();
-      } catch (error) {
-        console.error("Error updating buyer:", error);
-        alert("Failed to update buyer profile. See console for details.");
-      }
-    }
-  };
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   // Get verification status UI element
   const getVerificationStatus = () => {
@@ -161,15 +122,6 @@ const UpdateBuyer = () => {
     }
   };
 
-  // Loading state
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-3xl mx-auto">
@@ -188,7 +140,7 @@ const UpdateBuyer = () => {
                 <input
                   disabled
                   type="text"
-                  value={address}
+                  value={buyer?.walletAddress}
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-100"
                 />
               </div>
@@ -198,10 +150,10 @@ const UpdateBuyer = () => {
                   Name
                 </label>
                 <input
+                  disabled
                   type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  value={buyer?.name}
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-100"
                 />
               </div>
 
@@ -210,10 +162,10 @@ const UpdateBuyer = () => {
                   Age
                 </label>
                 <input
+                  disabled
                   type="text"
-                  value={age}
-                  onChange={(e) => setAge(e.target.value)}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  value={buyer?.age}
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-100"
                 />
               </div>
 
@@ -222,10 +174,10 @@ const UpdateBuyer = () => {
                   Email Address
                 </label>
                 <input
+                  disabled
                   type="text"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  value={buyer?.email}
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-100"
                 />
               </div>
 
@@ -234,10 +186,10 @@ const UpdateBuyer = () => {
                   City
                 </label>
                 <input
+                  disabled
                   type="text"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  value={buyer?.city}
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-100"
                 />
               </div>
 
@@ -246,34 +198,52 @@ const UpdateBuyer = () => {
                   Aadhar Number
                 </label>
                 <input
+                  disabled
                   type="text"
-                  value={aadharNumber}
-                  onChange={(e) => setAadharNumber(e.target.value)}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  value={buyer?.aadharNumber}
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-100"
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Pan Number
+                </label>
+                <input
+                  disabled
+                  type="text"
+                  value={buyer?.panNumber}
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-100"
                 />
               </div>
 
               <div className="mb-6">
                 <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Pan Number
+                  Your Aadhar Document
                 </label>
-                <input
-                  type="text"
-                  value={panNumber}
-                  onChange={(e) => setPanNumber(e.target.value)}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                />
+                <div className="text-blue-500">
+                  <a
+                    href={`https://ipfs.io/ipfs/${buyer?.document}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 hover:underline"
+                  >
+                    Here
+                  </a>
+                </div>
               </div>
 
-              <div className="flex items-center justify-end">
-                <button
-                  type="button"
-                  onClick={updateBuyer}
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300"
-                >
-                  Update
-                </button>
-              </div>
+              <Link
+                to="/updateBuyer"
+                className={`py-2 px-4 rounded font-medium ${
+                  verified
+                    ? "bg-blue-500 hover:bg-blue-700 text-white transition duration-300"
+                    : "bg-gray-300 text-gray-500"
+                }`}
+                onClick={(e) => !verified && e.preventDefault()}
+              >
+                Edit Profile
+              </Link>
             </form>
           </div>
         </div>
@@ -282,4 +252,4 @@ const UpdateBuyer = () => {
   );
 };
 
-export default UpdateBuyer;
+export default BuyerProfile;

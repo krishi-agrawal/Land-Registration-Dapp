@@ -31,7 +31,7 @@ function App() {
           <Route path="/SellerDashBoard/viewImage" element={<ViewImage />} />
           <Route path="/Dashboard" element={<Dashboard />} />
           <Route path="/UpdateBuyer" element={<UpdateBuyer />} />
-
+          <Route path="/BuyerProfile" element={<BuyerProfile />} />
           <Route path="/admin" render={(props) => <AdminLayout {...props} />} />
           <Route path="/approve" element={<ApproveRequest />} />
           <Route path="/LI" render={(props) => <LI {...props} />} /> 
