@@ -15,6 +15,7 @@ import BuyerProfile from "./views/BuyerProfile.jsx";
 import UpdateBuyer from "./views/UpdateBuyer.jsx"; 
 import ViewImage from "./views/ViewImage.jsx";
 import BuyerInfo from "./BuyerInfo.jsx";
+import LIDashboard from "./views/LIDashboard.jsx";
 // import LIDashboard from "./views/LIDashboard.jsx";
 
 function App() {
@@ -28,8 +29,7 @@ function App() {
           <Route path="/Vanta" element={<VantaGlobe />} />
 
           {/* Land Inspector */}
-
-          {/* <Route path="/LIDashboard" element={<LIDashboard />} /> */}
+          <Route path="/LIDashboard" element={<LIDashboard />} />
           <Route path="/SellerInfo" element={<SellerInfo />} />
           <Route path="/BuyerInfo" element={<BuyerInfo />} />
 
