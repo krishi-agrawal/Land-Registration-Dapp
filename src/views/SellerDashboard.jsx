@@ -201,7 +201,7 @@ const SDash = () => {
           </div>
         </div>
       </div>
-
+ 
       {/* Action Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {/* Add Land Card */}
@@ -210,7 +210,7 @@ const SDash = () => {
             <h5 className="text-xl font-semibold text-gray-800">Wish to Add Land!</h5>
           </div>
           <div className="p-5">
-            <Link 
+            <Link  
               to="/Seller/AddLand" 
               className={`block text-center py-2 px-4 rounded ${
                 verified 

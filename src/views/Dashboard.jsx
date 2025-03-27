@@ -18,7 +18,7 @@ const Dashboard = () => {
   const [sellersCount, setSellersCount] = useState(0);
   const [requestsCount, setRequestsCount] = useState(0);
   const [landData, setLandData] = useState([]);
-  const [loading, setLoading] = useState(true);
+ // const [loading, setLoading] = useState(true);
 
   // Using your provided MetaMask auth code
   useEffect(() => {
@@ -50,7 +50,7 @@ const Dashboard = () => {
         loadContractData(contractInstance, accounts[0]);
       } catch (error) {
         console.error("Error connecting wallet:", error);
-        setLoading(false);
+        //setLoading(false);
       }
     } 
   };
@@ -85,10 +85,10 @@ const Dashboard = () => {
       // Load land data
       await loadLandData(contractInstance, parseInt(landsCount.toString()));
       
-      setLoading(false);
+     // setLoading(false);
     } catch (error) {
       console.error("Error loading contract data:", error);
-      setLoading(false);
+      //setLoading(false);
     }
   };
 
@@ -130,7 +130,7 @@ const Dashboard = () => {
     } catch (error) {
       console.error("Error loading land data:", error);
     }
-  }; 
+  };  
  
   const requestLand = async (sellerAddress, landId) => { 
     try {
@@ -167,15 +167,15 @@ const Dashboard = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="text-center">
-          <Spinner className="inline-block" />
-        </div>
-      </div>
-    );
-  } 
+  // if (loading) {
+  //   return (
+  //     <div className="flex justify-center items-center h-screen">
+  //       <div className="text-center">
+  //         <Spinner className="inline-block" />
+  //       </div>
+  //     </div>
+  //   );
+  // } 
 
   // if (!registered) {
   //   return (
@@ -290,7 +290,7 @@ const Dashboard = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {landData.map((land) => (
-                <tr key={land.id}>
+                <tr key={land.id}> 
                   <td className="px-6 py-4 whitespace-nowrap">{land.id}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{land.area}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{land.city}</td>
@@ -302,12 +302,12 @@ const Dashboard = () => {
                     <button
                       onClick={() => requestLand(land.owner, land.id)}
                       disabled={!verified || land.isRequested}
-                      className={`py-2 px-4 rounded font-medium ${
+                      className={`py-2 px-4 rounded font-medium ${ 
                         !verified || land.isRequested
                           ? "bg-gray-300 cursor-not-allowed"
                           : "bg-blue-600 hover:bg-blue-700 text-white"
                       }`}
-                    >
+                    > 
                       Request Land
                     </button>
                   </td>
