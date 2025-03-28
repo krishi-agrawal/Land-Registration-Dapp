@@ -44,7 +44,13 @@ function App() {
             <Route path="buyerprofile" element={<BuyerProfile />} />
           </Route>
 
-          <Route path="/sellerinfo" element={<SellerInfo />} />
+          {/* Land Inspector */}
+          <Route path="/lidashboard">
+            <Route index element={<LIDashboard />} />
+            <Route path="buyerinfo" element={<BuyerInfo />} />
+            <Route path="sellerinfo" element={<SellerInfo />} />
+          </Route>
+
           <Route path="/admin" render={(props) => <AdminLayout {...props} />} />
           <Route path="/LI" render={(props) => <LI {...props} />} />
         </Routes>

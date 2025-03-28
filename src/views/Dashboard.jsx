@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ethers } from "ethers";
 import Registry from "../../artifacts/contracts/Registry.sol/Registry.json";
-import { Spinner } from "react-bootstrap";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -18,14 +17,14 @@ const Dashboard = () => {
   const [sellersCount, setSellersCount] = useState(0);
   const [requestsCount, setRequestsCount] = useState(0);
   const [landData, setLandData] = useState([]);
-  // const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   // Using your provided MetaMask auth code
   useEffect(() => {
     if (window.ethereum) {
       const ethersProvider = new ethers.providers.Web3Provider(window.ethereum);
       setProvider(ethersProvider);
-      connectWallet(ethersProvider);
+      connectWallet(ethersProvider); // Pass provider directly here
     } else {
       alert("Please install MetaMask!");
     }
@@ -55,8 +54,8 @@ const Dashboard = () => {
 
   // For refreshing page only once (keeping original functionality)
   useEffect(() => {
-    if (!window.location.hash) {
-      window.location = window.location + "#loaded";
+    if (!localStorage.getItem("pageLoaded")) {
+      localStorage.setItem("pageLoaded", "true");
       window.location.reload();
     }
   }, []);
@@ -86,7 +85,7 @@ const Dashboard = () => {
       setLoading(false);
     } catch (error) {
       console.error("Error loading contract data:", error);
-      //setLoading(false);
+      setLoading(false);
     }
   };
 
@@ -174,7 +173,7 @@ const Dashboard = () => {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="text-center">
-          <Spinner className="inline-block" />
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
         </div>
       </div>
     );

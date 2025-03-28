@@ -48,8 +48,8 @@ const ApproveRequest = () => {
 
   // For refreshing page only once
   useEffect(() => {
-    if (!window.location.hash) {
-      window.location = window.location + "#loaded";
+    if (!localStorage.getItem("pageLoaded")) {
+      localStorage.setItem("pageLoaded", "true");
       window.location.reload();
     }
   }, []);
