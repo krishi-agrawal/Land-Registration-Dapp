@@ -56,7 +56,9 @@ function Admin() {
   const getRoutes = (routes) => {
     return routes.map((prop, key) => {
       if (prop.layout === "/admin") {
-        return <Route path={prop.path} element={<prop.component />} key={key} />;
+        return (
+          <Route path={prop.path} element={<prop.component />} key={key} />
+        );
       }
       return null;
     });
@@ -100,7 +102,10 @@ function Admin() {
               <Routes>
                 {getRoutes(routes)}
                 <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
+                <Route
+                  path="*"
+                  element={<Navigate to="/admin/dashboard" replace />}
+                />
               </Routes>
             </main>
 

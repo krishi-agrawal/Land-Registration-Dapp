@@ -27,37 +27,35 @@ const UpdateBuyer = () => {
     if (window.ethereum) {
       const ethersProvider = new ethers.providers.Web3Provider(window.ethereum);
       setProvider(ethersProvider);
-      connectWallet();
+      connectWallet(ethersProvider);
     } else {
       alert("Please install MetaMask!");
     }
   }, []);
 
-  const connectWallet = async () => {
-    if (provider) {
-      try {
-        const accounts = await provider.send("eth_requestAccounts", []);
-        const ethersSigner = provider.getSigner();
-        setSigner(ethersSigner);
-        setAccount(accounts[0]);
+  const connectWallet = async (ethersProvider) => {
+    try {
+      const accounts = await ethersProvider.send("eth_requestAccounts", []);
+      const ethersSigner = ethersProvider.getSigner();
+      setSigner(ethersSigner);
+      setAccount(accounts[0]);
 
-        // Set current address
-        const currentAddress = accounts[0];
-        setAddress(currentAddress);
+      // Set current address
+      const currentAddress = accounts[0];
+      setAddress(currentAddress);
 
-        const contractInstance = new ethers.Contract(
-          "0x273d42dE3e74907cD70739f58DC717dF2872F736", // Using the contract address from your code
-          Land.abi,
-          ethersSigner
-        );
-        setContract(contractInstance);
+      const contractInstance = new ethers.Contract(
+        "0x273d42dE3e74907cD70739f58DC717dF2872F736", // Using the contract address from your code
+        Land.abi,
+        ethersSigner
+      );
+      setContract(contractInstance);
 
-        // Load buyer data after contract is initialized
-        await loadBuyerData(contractInstance, currentAddress);
-      } catch (error) {
-        console.error("Error connecting wallet:", error);
-        setLoading(false);
-      }
+      // Load buyer data after contract is initialized
+      await loadBuyerData(contractInstance, currentAddress);
+    } catch (error) {
+      console.error("Error connecting wallet:", error);
+      setLoading(false);
     }
   };
 
@@ -127,7 +125,7 @@ const UpdateBuyer = () => {
         await tx.wait();
 
         // Navigate to profile after successful update
-        navigate("/buyerProfile");
+        navigate("/buyerdashboard/buyerprofile");
 
         // Reload the page
         window.location.reload();
@@ -268,8 +266,14 @@ const UpdateBuyer = () => {
               <div className="flex items-center justify-end">
                 <button
                   type="button"
-                  onClick={updateBuyer}
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300"
+                  onClick={(e) =>
+                    !verified ? e.preventDefault() : updateBuyer()
+                  }
+                  className={`py-2 px-4 rounded font-medium ${
+                    verified
+                      ? "bg-blue-500 hover:bg-blue-700 text-white transition duration-300"
+                      : "bg-gray-300 text-gray-500"
+                  }`}
                 >
                   Update
                 </button>

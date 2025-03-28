@@ -23,8 +23,9 @@ const RegisterBuyer = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const apiKey = "3df76883d3f7b0b7bf14"; 
-  const apiSecret = "318a60d3bf31978bd8bd9bb490e2153201e5600efdbf49ac167aa15cc2ca7dfb"; 
+  const apiKey = "3df76883d3f7b0b7bf14";
+  const apiSecret =
+    "318a60d3bf31978bd8bd9bb490e2153201e5600efdbf49ac167aa15cc2ca7dfb";
   const pinataBaseUrl = "https://api.pinata.cloud/pinning/pinFileToIPFS";
 
   useEffect(() => {
@@ -46,7 +47,7 @@ const RegisterBuyer = () => {
         setAccount(accounts[0]);
 
         const contractInstance = new ethers.Contract(
-          "0x273d42dE3e74907cD70739f58DC717dF2872F736", 
+          "0x273d42dE3e74907cD70739f58DC717dF2872F736",
           Registry.abi,
           ethersSigner
         );
@@ -99,7 +100,15 @@ const RegisterBuyer = () => {
     setError("");
     setSuccess("");
 
-    if (!name || !age || !city || !aadharNumber || !panNumber || !document || !email) {
+    if (
+      !name ||
+      !age ||
+      !city ||
+      !aadharNumber ||
+      !panNumber ||
+      !document ||
+      !email
+    ) {
       setError("All fields are compulsory!");
       setLoading(false);
       return;
@@ -126,6 +135,9 @@ const RegisterBuyer = () => {
         if (isRegistered) {
           setError("This wallet address is already registered in the system!");
           setLoading(false);
+          setTimeout(() => {
+            navigate("/buyerdashboard");
+          }, 2000);
           return;
         }
       } catch (checkError) {
@@ -135,7 +147,7 @@ const RegisterBuyer = () => {
       // Upload document to Pinata
       const documentHash = await uploadToPinata(document, "buyer-document.pdf");
       console.log("Document uploaded to IPFS:", documentHash);
-      
+
       console.log("Registration parameters:");
       console.log("Name:", name);
       console.log("Age:", parseInt(age));
@@ -144,7 +156,7 @@ const RegisterBuyer = () => {
       console.log("PAN Number:", panNumber);
       console.log("Document Hash:", documentHash);
       console.log("Email:", email);
-      
+
       console.log("Sending transaction to register buyer...");
       const tx = await contract.registerBuyer(
         name,
@@ -154,35 +166,35 @@ const RegisterBuyer = () => {
         panNumber,
         documentHash,
         email,
-        { 
-          gasLimit: 1000000  
+        {
+          gasLimit: 1000000,
         }
       );
 
       console.log("Transaction sent, waiting for confirmation...");
       const receipt = await tx.wait();
       console.log("Transaction receipt:", receipt);
-      
+
       setSuccess("Registration successful! Redirecting...");
       toast.success("Buyer registered successfully!");
 
       setTimeout(() => {
-        navigate("/");
+        navigate("/BuyerProfile");
       }, 2000);
     } catch (error) {
       console.error("Detailed error:", error);
-      
+
       let errorMessage = "Registration failed: ";
-      
+
       if (error.reason) {
         errorMessage += error.reason;
       } else if (error.data && error.data.message) {
         errorMessage += error.data.message;
       } else if (error.message) {
-        const message = error.message.split('(')[0].trim();
+        const message = error.message.split("(")[0].trim();
         errorMessage += message;
       }
-      
+
       setError(errorMessage);
       toast.error(errorMessage);
     }
@@ -192,7 +204,9 @@ const RegisterBuyer = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-50 to-purple-50">
       <div className="bg-white shadow-2xl rounded-2xl p-8 w-full max-w-lg">
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">Buyer Registration</h1>
+        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
+          Buyer Registration
+        </h1>
 
         {!account ? (
           <button

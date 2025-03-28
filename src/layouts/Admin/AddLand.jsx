@@ -42,36 +42,37 @@ const AddLand = () => {
   const navigate = useNavigate();
 
   // Pinata Configuration
-  const apiKey = '3df76883d3f7b0b7bf14';
-  const apiSecret = '318a60d3bf31978bd8bd9bb490e2153201e5600efdbf49ac167aa15cc2ca7dfb';
-  const pinataBaseUrl = 'https://api.pinata.cloud/pinning/pinFileToIPFS';
+  const apiKey = "3df76883d3f7b0b7bf14";
+  const apiSecret =
+    "318a60d3bf31978bd8bd9bb490e2153201e5600efdbf49ac167aa15cc2ca7dfb";
+  const pinataBaseUrl = "https://api.pinata.cloud/pinning/pinFileToIPFS";
 
   const uploadToPinata = async (file, fileName) => {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append("file", file);
 
     const metadata = JSON.stringify({
       name: fileName,
     });
-    formData.append('pinataMetadata', metadata);
+    formData.append("pinataMetadata", metadata);
 
     const options = JSON.stringify({
       cidVersion: 0,
     });
-    formData.append('pinataOptions', options);
+    formData.append("pinataOptions", options);
 
     try {
       const response = await axios.post(pinataBaseUrl, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
           pinata_api_key: apiKey,
           pinata_secret_api_key: apiSecret,
         },
       });
       return `https://gateway.pinata.cloud/ipfs/${response.data.IpfsHash}`;
     } catch (error) {
-      console.error('Error uploading to Pinata:', error);
-      toast.error('File upload failed');
+      console.error("Error uploading to Pinata:", error);
+      toast.error("File upload failed");
       throw error;
     }
   };
@@ -107,7 +108,7 @@ const AddLand = () => {
         // Check verification status
         // const isVerified = await contractInstance.SellerVerification(accounts[0]);
         // const isRegistered = await contractInstance.RegisteredSellerMapping(accounts[0]);
-        
+
         // setVerified(isVerified);
         // setRegistered(isRegistered);
         setLoading(false);
@@ -128,13 +129,16 @@ const AddLand = () => {
     setUploadLoading(true);
 
     try {
-      const imageHash = await uploadToPinata(landImage, 'land_image.jpg');
-      const documentHash = await uploadToPinata(aadharDocument, 'aadhar_document1.pdf');
+      const imageHash = await uploadToPinata(landImage, "land_image.jpg");
+      const documentHash = await uploadToPinata(
+        aadharDocument,
+        "aadhar_document1.pdf"
+      );
 
       setImageUrl(imageHash);
       setDocumentUrl(documentHash);
 
-      toast.success('Files uploaded successfully');
+      toast.success("Files uploaded successfully");
       setUploadLoading(false);
       return { imageHash, documentHash };
     } catch (error) {
@@ -199,7 +203,6 @@ const AddLand = () => {
     setAadharDocument(file);
   };
 
-
   return (
     <div className="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
       <div className="relative py-3 sm:max-w-xl sm:mx-auto">
@@ -220,69 +223,74 @@ const AddLand = () => {
             )}
 
             {!registered || !verified ? (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+              <div
+                className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+                role="alert"
+              >
                 <strong className="font-bold">Access Denied! </strong>
-                <span className="block sm:inline">You are not verified to add land.</span>
+                <span className="block sm:inline">
+                  You are not verified to add land.
+                </span>
               </div>
             ) : (
               <div className="divide-y divide-gray-200">
                 <div className="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
                   <div className="flex flex-col">
                     <label className="leading-loose">Area (sqm)</label>
-                    <Input 
-                      type="text" 
-                      value={area} 
-                      onChange={(e) => setArea(e.target.value)} 
+                    <Input
+                      type="text"
+                      value={area}
+                      onChange={(e) => setArea(e.target.value)}
                       className="px-4 py-2 border focus:ring-gray-500 focus:border-gray-900 w-full sm:text-sm border-gray-300 rounded-md focus:outline-none text-gray-600"
                     />
                   </div>
-                  
+
                   <div className="flex flex-col">
                     <label className="leading-loose">City</label>
-                    <Input 
-                      type="text" 
-                      value={city} 
-                      onChange={(e) => setCity(e.target.value)} 
+                    <Input
+                      type="text"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
                       className="px-4 py-2 border focus:ring-gray-500 focus:border-gray-900 w-full sm:text-sm border-gray-300 rounded-md focus:outline-none text-gray-600"
                     />
                   </div>
 
                   <div className="flex flex-col">
                     <label className="leading-loose">State</label>
-                    <Input 
-                      type="text" 
-                      value={stateLoc} 
-                      onChange={(e) => setStateLoc(e.target.value)} 
+                    <Input
+                      type="text"
+                      value={stateLoc}
+                      onChange={(e) => setStateLoc(e.target.value)}
                       className="px-4 py-2 border focus:ring-gray-500 focus:border-gray-900 w-full sm:text-sm border-gray-300 rounded-md focus:outline-none text-gray-600"
                     />
                   </div>
 
                   <div className="flex flex-col">
                     <label className="leading-loose">Price (ETH)</label>
-                    <Input 
-                      type="text" 
-                      value={price} 
-                      onChange={(e) => setPrice(e.target.value)} 
+                    <Input
+                      type="text"
+                      value={price}
+                      onChange={(e) => setPrice(e.target.value)}
                       className="px-4 py-2 border focus:ring-gray-500 focus:border-gray-900 w-full sm:text-sm border-gray-300 rounded-md focus:outline-none text-gray-600"
                     />
                   </div>
 
                   <div className="flex flex-col">
                     <label className="leading-loose">Property PID</label>
-                    <Input 
-                      type="text" 
-                      value={propertyPID} 
-                      onChange={(e) => setPropertyPID(e.target.value)} 
+                    <Input
+                      type="text"
+                      value={propertyPID}
+                      onChange={(e) => setPropertyPID(e.target.value)}
                       className="px-4 py-2 border focus:ring-gray-500 focus:border-gray-900 w-full sm:text-sm border-gray-300 rounded-md focus:outline-none text-gray-600"
                     />
                   </div>
 
                   <div className="flex flex-col">
                     <label className="leading-loose">Survey Number</label>
-                    <Input 
-                      type="text" 
-                      value={surveyNum} 
-                      onChange={(e) => setSurveyNum(e.target.value)} 
+                    <Input
+                      type="text"
+                      value={surveyNum}
+                      onChange={(e) => setSurveyNum(e.target.value)}
                       className="px-4 py-2 border focus:ring-gray-500 focus:border-gray-900 w-full sm:text-sm border-gray-300 rounded-md focus:outline-none text-gray-600"
                     />
                   </div>
@@ -290,17 +298,17 @@ const AddLand = () => {
                   <div className="flex flex-col">
                     <label className="leading-loose">Upload Land Image</label>
                     <div className="flex space-x-2">
-                      <Input 
-                        type="file" 
-                        onChange={handleLandImageUpload} 
+                      <Input
+                        type="file"
+                        onChange={handleLandImageUpload}
                         className="px-4 py-2 border focus:ring-gray-500 focus:border-gray-900 w-full sm:text-sm border-gray-300 rounded-md focus:outline-none text-gray-600"
                       />
-                      <button 
-                        onClick={uploadFiles} 
+                      <button
+                        onClick={uploadFiles}
                         disabled={!landImage || uploadLoading}
                         className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:opacity-50"
                       >
-                        {uploadLoading ? 'Uploading...' : 'Upload Image'}
+                        {uploadLoading ? "Uploading..." : "Upload Image"}
                       </button>
                     </div>
                   </div>
@@ -308,47 +316,48 @@ const AddLand = () => {
                   <div className="flex flex-col">
                     <label className="leading-loose">Upload Aadhar Card</label>
                     <div className="flex space-x-2">
-                      <Input 
-                        type="file" 
-                        onChange={handleAadharDocumentUpload} 
+                      <Input
+                        type="file"
+                        onChange={handleAadharDocumentUpload}
                         className="px-4 py-2 border focus:ring-gray-500 focus:border-gray-900 w-full sm:text-sm border-gray-300 rounded-md focus:outline-none text-gray-600"
                       />
-                      <button 
-                        onClick={uploadFiles} 
+                      <button
+                        onClick={uploadFiles}
                         disabled={!aadharDocument || uploadLoading}
                         className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:opacity-50"
                       >
-                        {uploadLoading ? 'Uploading...' : 'Upload Document'}
+                        {uploadLoading ? "Uploading..." : "Upload Document"}
                       </button>
                     </div>
                   </div>
                 </div>
 
                 <div className="pt-4 flex items-center space-x-4">
-                  <button 
-                    onClick={addLand} 
+                  <button
+                    onClick={addLand}
                     disabled={transactionLoading}
                     className="bg-blue-500 flex justify-center items-center w-full text-white px-4 py-3 rounded-md focus:outline-none hover:bg-blue-600"
                   >
                     {transactionLoading ? (
-                      <svg 
-                        className="animate-spin h-5 w-5 mr-3" 
+                      <svg
+                        className="animate-spin h-5 w-5 mr-3"
                         viewBox="0 0 24 24"
                       >
-                        <circle 
-                          className="opacity-25" 
-                          cx="12" 
-                          cy="12" 
-                          r="10" 
-                          stroke="currentColor" 
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
                           strokeWidth="4"
                         ></circle>
-                        <path 
-                          className="opacity-75" 
-                          fill="currentColor" 
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                         ></path>
-                      </svg>) : (
+                      </svg>
+                    ) : (
                       "Add Land"
                     )}
                   </button>
