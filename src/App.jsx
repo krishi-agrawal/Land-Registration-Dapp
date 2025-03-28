@@ -15,7 +15,7 @@ import BuyerProfile from "./views/BuyerProfile.jsx";
 import UpdateBuyer from "./views/UpdateBuyer.jsx"; 
 import ViewImage from "./views/ViewImage.jsx";
 import BuyerInfo from "./BuyerInfo.jsx";
-// import LIDashboard from "./views/LIDashboard.jsx";
+import LIDashboard from "./views/LIDashboard.jsx";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -29,7 +29,7 @@ function App() {
 
           {/* Land Inspector */}
 
-          {/* <Route path="/LIDashboard" element={<LIDashboard />} /> */}
+          <Route path="/LIDashboard" element={<LIDashboard />} />
           <Route path="/SellerInfo" element={<SellerInfo />} />
           <Route path="/BuyerInfo" element={<BuyerInfo />} />
 
