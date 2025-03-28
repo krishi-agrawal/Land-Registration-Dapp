@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
-// import Land from "../artifacts/Land.json";
 import Registry from "../../artifacts/contracts/Registry.sol/Registry.json";
 
 const ApproveRequest = () => {
@@ -12,6 +11,7 @@ const ApproveRequest = () => {
   const [registered, setRegistered] = useState(false);
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [processingTx, setProcessingTx] = useState(false);
 
   // Using your provided MetaMask auth code
   useEffect(() => {
@@ -68,26 +68,30 @@ const ApproveRequest = () => {
       // Fetch all relevant requests
       const userRequests = [];
 
-      for (let i = 1; i <= requestsCount; i++) {
-        const request = await contractInstance.getRequestDetails(i);
-        const approved = await contractInstance.isApproved(i);
+      for (let i = 1; i <= requestsCount.toNumber(); i++) {
+        try {
+          const request = await contractInstance.getRequestDetails(i);
+          const approved = await contractInstance.isApproved(i);
 
-        // Check if current user is the land owner
-        if (currentAddress.toLowerCase() === request[0].toLowerCase()) {
-          userRequests.push({
-            id: i,
-            buyerId: request[1],
-            landId: request[2],
-            status: request[3].toString(),
-            approved,
-          });
+          // Check if current user is the land owner
+          if (currentAddress.toLowerCase() === request[0].toLowerCase()) {
+            userRequests.push({
+              id: i,
+              buyerId: request[1],
+              landId: request[2].toNumber(), // Convert BigNumber to regular number
+              status: request[3], // Already a string
+              approved,
+            });
+          }
+        } catch (error) {
+          console.error(`Error fetching request #${i}:`, error);
         }
       }
 
       setRequests(userRequests);
-      setLoading(false);
     } catch (error) {
       console.error("Error loading request data:", error);
+    } finally {
       setLoading(false);
     }
   };
@@ -96,13 +100,27 @@ const ApproveRequest = () => {
     try {
       if (!contract) return;
 
-      const tx = await contract.approveRequest(reqId);
-      await tx.wait();
+      setProcessingTx(true);
+      console.log(`Approving request #${reqId}`);
 
-      // Reload the page after transaction is confirmed
-      window.location.reload();
+      const tx = await contract.approveRequest(reqId, {
+        gasLimit: 2100000,
+      });
+
+      console.log("Transaction sent:", tx.hash);
+      alert("Transaction submitted. Please wait for confirmation...");
+
+      await tx.wait();
+      console.log("Transaction confirmed");
+      alert("Request approved successfully!");
+
+      // Reload the data without refreshing page
+      await loadRequestData(contract, account);
     } catch (error) {
       console.error("Error approving request:", error);
+      alert("Failed to approve request. Please try again.");
+    } finally {
+      setProcessingTx(false);
     }
   };
 
@@ -123,6 +141,9 @@ const ApproveRequest = () => {
           <h1 className="text-2xl font-bold text-red-600">
             You are not authorized to view this page.
           </h1>
+          <p className="mt-4 text-gray-700">
+            Only registered sellers can view and approve land purchase requests.
+          </p>
         </div>
       </div>
     );
@@ -130,9 +151,27 @@ const ApproveRequest = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Processing overlay */}
+      {processingTx && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+            <p className="mt-4 text-lg font-medium text-gray-700">
+              Processing transaction...
+            </p>
+            <p className="text-sm text-gray-500">
+              Please wait while the blockchain confirms your action.
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200">
           <h4 className="text-xl font-bold text-gray-800">Requests Info</h4>
+          <p className="text-gray-600 mt-1">
+            Manage land purchase requests from buyers
+          </p>
         </div>
         <div className="p-6">
           <div className="overflow-x-auto">
@@ -172,14 +211,32 @@ const ApproveRequest = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         {request.id}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {request.buyerId}
+                      <td className="px-6 py-4 whitespace-nowrap font-mono text-sm">
+                        {request.buyerId.slice(0, 6)}...
+                        {request.buyerId.slice(-4)}
+                        <button
+                          className="ml-2 text-blue-500 hover:text-blue-700"
+                          onClick={() =>
+                            navigator.clipboard.writeText(request.buyerId)
+                          }
+                          title="Copy address"
+                        >
+                          📋
+                        </button>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {request.landId}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        {request.status}
+                        {request.approved ? (
+                          <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                            Approved
+                          </span>
+                        ) : (
+                          <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                            Pending
+                          </span>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <button
@@ -191,7 +248,9 @@ const ApproveRequest = () => {
                               : "bg-blue-500 hover:bg-blue-700 text-white transition duration-300"
                           }`}
                         >
-                          Approve Request
+                          {request.approved
+                            ? "Already Approved"
+                            : "Approve Request"}
                         </button>
                       </td>
                     </tr>

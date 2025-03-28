@@ -11,10 +11,12 @@ import AddLand from "./layouts/Admin/AddLand.jsx";
 import SellerInfo from "./SellerInfo.jsx";
 import SellerDashboard from "./views/SellerDashboard.jsx";
 import BuyerDashboard from "./views/Dashboard.jsx";
+import BuyerProfile from "./views/BuyerProfile.jsx";
 import UpdateBuyer from "./views/UpdateBuyer.jsx";
 import ViewImage from "./views/ViewImage.jsx";
-import BuyerProfile from "./views/BuyerProfile.jsx";
 import SellerProfile from "./views/SellerProfile.jsx";
+import BuyerInfo from "./BuyerInfo.jsx";
+import LIDashboard from "./views/LIDashboard.jsx";
 
 function App() {
   const [count, setCount] = useState(0);

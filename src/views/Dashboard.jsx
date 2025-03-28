@@ -18,7 +18,7 @@ const Dashboard = () => {
   const [sellersCount, setSellersCount] = useState(0);
   const [requestsCount, setRequestsCount] = useState(0);
   const [landData, setLandData] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
 
   // Using your provided MetaMask auth code
   useEffect(() => {
@@ -86,7 +86,7 @@ const Dashboard = () => {
       setLoading(false);
     } catch (error) {
       console.error("Error loading contract data:", error);
-      setLoading(false);
+      //setLoading(false);
     }
   };
 

@@ -79,7 +79,7 @@ const BuyerProfile = () => {
         age: buyerDetails[5],
         aadharNumber: buyerDetails[6],
         walletAddress: currentAddress,
-      });
+      }); 
 
       setLoading(false);
     } catch (error) {
@@ -87,7 +87,7 @@ const BuyerProfile = () => {
       setLoading(false);
     }
   };
-
+ 
   // Loading state
   if (loading) {
     return (
