@@ -17,6 +17,9 @@ import ViewImage from "./views/ViewImage.jsx";
 import SellerProfile from "./views/SellerProfile.jsx";
 import BuyerInfo from "./BuyerInfo.jsx";
 import LIDashboard from "./views/LIDashboard.jsx";
+import OwnedLands from "./views/OwnedLands.jsx";
+import MakePayment from "./views/MakePayment.jsx";
+import TransactionInfo from "./views/TransactionInfo.jsx";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -42,6 +45,8 @@ function App() {
             <Route index element={<BuyerDashboard />} />
             <Route path="updatebuyer" element={<UpdateBuyer />} />
             <Route path="buyerprofile" element={<BuyerProfile />} />
+            <Route path="ownedlands" element={<OwnedLands />} />
+            <Route path="makepayment" element={<MakePayment />} />
           </Route>
 
           {/* Land Inspector */}
@@ -49,6 +54,7 @@ function App() {
             <Route index element={<LIDashboard />} />
             <Route path="buyerinfo" element={<BuyerInfo />} />
             <Route path="sellerinfo" element={<SellerInfo />} />
+            <Route path="transactioninfo" element={<TransactionInfo />} />
           </Route>
 
           <Route path="/admin" render={(props) => <AdminLayout {...props} />} />
