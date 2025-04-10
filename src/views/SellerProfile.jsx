@@ -220,6 +220,17 @@ const SellerProfile = () => {
             </form>
           </div>
         </div>
+        <Link
+          to="/sellerDashboard"
+          className={`block text-center py-2 px-4 rounded w-2/3 mx-auto my-5 ${
+            verified
+              ? "bg-blue-500 hover:bg-blue-700 text-white transition duration-300"
+              : "bg-gray-300 text-gray-500 cursor-not-allowed"
+          }`}
+          onClick={(e) => !verified && e.preventDefault()}
+        >
+          Return to Seller Dashboard
+        </Link>
       </div>
     </div>
   );

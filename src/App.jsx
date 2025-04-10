@@ -13,6 +13,7 @@ import SellerDashboard from "./views/SellerDashboard.jsx";
 import BuyerDashboard from "./views/Dashboard.jsx";
 import BuyerProfile from "./views/BuyerProfile.jsx";
 import UpdateBuyer from "./views/UpdateBuyer.jsx";
+import UpdateSeller from "./views/UpdateSeller.jsx";
 import ViewImage from "./views/ViewImage.jsx";
 import SellerProfile from "./views/SellerProfile.jsx";
 import BuyerInfo from "./BuyerInfo.jsx";
@@ -39,6 +40,7 @@ function App() {
             <Route path="viewImage" element={<ViewImage />} />
             <Route path="sellerprofile" element={<SellerProfile />} />
             <Route path="approveRequest" element={<ApproveRequest />} />
+            <Route path="updateseller" element={<UpdateSeller />} />
           </Route>
           {/* Buyer */}
           <Route path="/buyerdashboard">

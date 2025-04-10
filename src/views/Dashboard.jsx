@@ -92,35 +92,32 @@ const Dashboard = () => {
   const loadLandData = async (contractInstance, count) => {
     try {
       const lands = [];
-      const landOwners = {};
 
       // Get all land owners
-      for (let i = 1; i <= count; i++) {
-        const address = await contractInstance.getLandOwner(i);
-        landOwners[i] = address;
-      }
 
+      let idx = 0;
       // Get land details
       for (let i = 1; i <= count; i++) {
-        const area = await contractInstance.getArea(i);
-        const city = await contractInstance.getCity(i);
-        const state = await contractInstance.getState(i);
-        const price = await contractInstance.getPrice(i);
-        const pid = await contractInstance.getPID(i);
-        const surveyNumber = await contractInstance.getSurveyNumber(i);
         const isRequested = await contractInstance.isRequested(i);
+        if (!isRequested) {
+          idx++;
+          const land = await contractInstance.lands(i);
 
-        lands.push({
-          id: i,
-          area: area.toString(),
-          city,
-          state,
-          price: ethers.utils.formatEther(price),
-          pid: pid.toString(),
-          surveyNumber: surveyNumber.toString(),
-          owner: landOwners[i],
-          isRequested,
-        });
+          const owner = await contractInstance.getLandOwner(i);
+
+          lands.push({
+            id: idx,
+            originalId: i,
+            area: land.area.toString(),
+            city: land.city,
+            state: land.state,
+            price: land.landPrice.toString(),
+            pid: land.propertyPID.toString(),
+            surveyNumber: land.physicalSurveyNumber.toString(),
+            owner,
+            isRequested,
+          });
+        }
       }
 
       setLandData(lands);
@@ -295,7 +292,7 @@ const Dashboard = () => {
                   State
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Price
+                  Price (in ₹)
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Property PID
@@ -315,7 +312,9 @@ const Dashboard = () => {
                   <td className="px-6 py-4 whitespace-nowrap">{land.area}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{land.city}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{land.state}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{land.price}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {ethers.utils.formatEther(land.price)}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap">{land.pid}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {land.surveyNumber}

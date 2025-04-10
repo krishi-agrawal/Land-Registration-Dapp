@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import Registry from "../../artifacts/contracts/Registry.sol/Registry.json";
-
+import { Link } from "react-router-dom";
 const ApproveRequest = () => {
   // States
   const [provider, setProvider] = useState(null);
@@ -12,6 +12,7 @@ const ApproveRequest = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [processingTx, setProcessingTx] = useState(false);
+  const [verified, setVerified] = useState(false);
 
   // Using your provided MetaMask auth code
   useEffect(() => {
@@ -60,14 +61,15 @@ const ApproveRequest = () => {
       const isSeller = await contractInstance.isSeller(currentAddress);
       console.log("Is registered seller:", isSeller);
       setRegistered(isSeller);
-
+      const isVerified = await contractInstance.isVerified(currentAddress);
+      setVerified(isVerified);
       // Get requests count
       const requestsCount = await contractInstance.getRequestsCount();
       console.log("Requests count:", requestsCount.toString());
 
       // Fetch all relevant requests
       const userRequests = [];
-
+      let idx = 0;
       for (let i = 1; i <= requestsCount.toNumber(); i++) {
         try {
           const request = await contractInstance.getRequestDetails(i);
@@ -75,8 +77,10 @@ const ApproveRequest = () => {
 
           // Check if current user is the land owner
           if (currentAddress.toLowerCase() === request[0].toLowerCase()) {
+            idx++;
             userRequests.push({
-              id: i,
+              id: idx,
+              originalId: i,
               buyerId: request[1],
               landId: request[2].toNumber(), // Convert BigNumber to regular number
               status: request[3], // Already a string
@@ -260,6 +264,17 @@ const ApproveRequest = () => {
             </table>
           </div>
         </div>
+        <Link
+          to="/sellerDashboard"
+          className={`block text-center py-2 px-4 rounded w-2/3 mx-auto my-5 ${
+            verified
+              ? "bg-blue-500 hover:bg-blue-700 text-white transition duration-300"
+              : "bg-gray-300 text-gray-500 cursor-not-allowed"
+          }`}
+          onClick={(e) => !verified && e.preventDefault()}
+        >
+          Return to Seller Dashboard
+        </Link>
       </div>
     </div>
   );

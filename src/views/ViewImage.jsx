@@ -85,7 +85,9 @@ const ViewImage = () => {
       // Fetch all lands data in parallel
       const landPromises = [];
       for (let i = 1; i <= landCount; i++) {
-        landPromises.push(getLandDetails(contract, i));
+        const seller = await contract.getLandOwner(i);
+        if (seller.toLowerCase() === address.toLowerCase())
+          landPromises.push(getLandDetails(contract, i));
       }
 
       const lands = await Promise.all(landPromises);
@@ -134,9 +136,6 @@ const ViewImage = () => {
     <div key={land.id} className="w-full md:w-1/2 p-4">
       <div className="bg-white rounded-lg overflow-hidden shadow-lg transition duration-300 hover:shadow-xl">
         <div className="relative">
-          <div className="absolute top-0 left-0 bg-blue-500 text-white font-bold py-1 px-3 rounded-br-lg z-10">
-            {land.id}
-          </div>
           <img
             src={land.image}
             alt={`Land ${land.id}`}

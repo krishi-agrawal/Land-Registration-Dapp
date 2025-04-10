@@ -110,19 +110,24 @@ const SDash = () => {
       const count = landsTotal.toNumber();
 
       // Get land details
+      let idx = 0;
       for (let i = 1; i <= count; i++) {
         try {
-          const land = await contractInstance.lands(i);
-
-          landsData.push({
-            id: i,
-            area: land.area.toString(),
-            city: land.city,
-            state: land.state,
-            price: land.landPrice.toString(),
-            propertyPID: land.propertyPID.toString(),
-            surveyNumber: land.physicalSurveyNumber.toString(),
-          });
+          const seller = await contractInstance.getLandOwner(i);
+          if (seller.toLowerCase() === currentAccount.toLowerCase()) {
+            const land = await contractInstance.lands(i);
+            idx++;
+            landsData.push({
+              originalId: i,
+              id: idx,
+              area: land.area.toString(),
+              city: land.city,
+              state: land.state,
+              price: land.landPrice.toString(),
+              propertyPID: land.propertyPID.toString(),
+              surveyNumber: land.physicalSurveyNumber.toString(),
+            });
+          }
         } catch (error) {
           console.error(`Error fetching land ${i}:`, error);
         }
@@ -281,7 +286,7 @@ const SDash = () => {
                   State
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Price
+                  Price (in ₹)
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Property PID
@@ -298,7 +303,9 @@ const SDash = () => {
                   <td className="px-6 py-4 whitespace-nowrap">{land.area}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{land.city}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{land.state}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{land.price}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {ethers.utils.formatEther(land.price)}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {land.propertyPID}
                   </td>

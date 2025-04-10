@@ -16,8 +16,8 @@ const MakePayment = () => {
   useEffect(() => {
     const initialize = async () => {
       try {
-        if (!window.location.hash) {
-          window.location = window.location + "#loaded";
+        if (!localStorage.getItem("pageLoaded")) {
+          localStorage.setItem("pageLoaded", "true");
           window.location.reload();
         }
 
@@ -179,7 +179,7 @@ const MakePayment = () => {
                     Owner
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Price (₹)
+                    Price (in ₹)
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status

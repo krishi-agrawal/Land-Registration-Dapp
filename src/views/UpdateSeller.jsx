@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ethers } from "ethers";
 import Land from "../../artifacts/contracts/Registry.sol/Registry.json";
 
-const UpdateBuyer = () => {
+const UpdateSeller = () => {
   // States
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
@@ -12,8 +12,6 @@ const UpdateBuyer = () => {
   const [address, setAddress] = useState("");
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
-  const [city, setCity] = useState("");
-  const [email, setEmail] = useState("");
   const [aadharNumber, setAadharNumber] = useState("");
   const [panNumber, setPanNumber] = useState("");
   const [verified, setVerified] = useState(false);
@@ -22,7 +20,7 @@ const UpdateBuyer = () => {
 
   const navigate = useNavigate();
 
-  // Using your provided MetaMask auth code
+  // MetaMask connection
   useEffect(() => {
     if (window.ethereum) {
       const ethersProvider = new ethers.providers.Web3Provider(window.ethereum);
@@ -39,20 +37,16 @@ const UpdateBuyer = () => {
       const ethersSigner = ethersProvider.getSigner();
       setSigner(ethersSigner);
       setAccount(accounts[0]);
-
-      // Set current address
-      const currentAddress = accounts[0];
-      setAddress(currentAddress);
+      setAddress(accounts[0]);
 
       const contractInstance = new ethers.Contract(
-        "0x273d42dE3e74907cD70739f58DC717dF2872F736", // Using the contract address from your code
+        "0x273d42dE3e74907cD70739f58DC717dF2872F736",
         Land.abi,
         ethersSigner
       );
       setContract(contractInstance);
 
-      // Load buyer data after contract is initialized
-      await loadBuyerData(contractInstance, currentAddress);
+      await loadSellerData(contractInstance, accounts[0]);
     } catch (error) {
       console.error("Error connecting wallet:", error);
       setLoading(false);
@@ -67,7 +61,7 @@ const UpdateBuyer = () => {
     }
   }, []);
 
-  const loadBuyerData = async (contractInstance, currentAddress) => {
+  const loadSellerData = async (contractInstance, currentAddress) => {
     try {
       // Check verification status
       const isVerified = await contractInstance.isVerified(currentAddress);
@@ -76,34 +70,27 @@ const UpdateBuyer = () => {
       const isRejected = await contractInstance.isRejected(currentAddress);
       setRejected(isRejected);
 
-      // Get buyer details
-      const buyer = await contractInstance.getBuyerDetails(currentAddress);
-      console.log("Buyer details:", buyer);
+      // Get seller details
+      const sellerDetails = await contractInstance.getSellerDetails(
+        currentAddress
+      );
+      console.log("Seller details:", sellerDetails);
 
-      // Update state with buyer details
-      setName(buyer[0]);
-      setCity(buyer[1]);
-      setPanNumber(buyer[2]);
-      setEmail(buyer[4]);
-      setAge(buyer[5]);
-      setAadharNumber(buyer[6]);
+      // Update state with seller details
+      setName(sellerDetails[0]);
+      setAge(sellerDetails[1]);
+      setAadharNumber(sellerDetails[2]);
+      setPanNumber(sellerDetails[3]);
 
       setLoading(false);
     } catch (error) {
-      console.error("Error loading buyer data:", error);
+      console.error("Error loading seller data:", error);
       setLoading(false);
     }
   };
 
-  const updateBuyer = async () => {
-    if (
-      name === "" ||
-      age === "" ||
-      city === "" ||
-      email === "" ||
-      aadharNumber === "" ||
-      panNumber === ""
-    ) {
+  const updateSeller = async () => {
+    if (name === "" || age === "" || aadharNumber === "" || panNumber === "") {
       alert("All the fields are compulsory!");
     } else if (aadharNumber.length !== 12) {
       alert("Aadhar Number should be 12 digits long!");
@@ -113,25 +100,23 @@ const UpdateBuyer = () => {
       alert("Your age must be a number");
     } else {
       try {
-        const tx = await contract.updateBuyer(
+        const tx = await contract.updateSeller(
           name,
           age,
-          city,
           aadharNumber,
-          email,
           panNumber
         );
 
         await tx.wait();
 
         // Navigate to profile after successful update
-        navigate("/buyerdashboard/buyerprofile");
+        navigate("/sellerdashboard/sellerprofile");
 
         // Reload the page
         window.location.reload();
       } catch (error) {
-        console.error("Error updating buyer:", error);
-        alert("Failed to update buyer profile. See console for details.");
+        console.error("Error updating seller:", error);
+        alert("Failed to update seller profile. See console for details.");
       }
     }
   };
@@ -173,7 +158,9 @@ const UpdateBuyer = () => {
       <div className="max-w-3xl mx-auto">
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-            <h5 className="text-xl font-bold text-gray-800">Buyer Profile</h5>
+            <h5 className="text-xl font-bold text-gray-800">
+              Update Seller Profile
+            </h5>
             <div className="verification-status">{getVerificationStatus()}</div>
           </div>
 
@@ -218,30 +205,6 @@ const UpdateBuyer = () => {
 
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Email Address
-                </label>
-                <input
-                  type="text"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  City
-                </label>
-                <input
-                  type="text"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
                   Aadhar Number
                 </label>
                 <input
@@ -266,11 +229,18 @@ const UpdateBuyer = () => {
                 />
               </div>
 
-              <div className="flex items-center justify-end">
+              <div className="flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => navigate("/sellerdashboard/sellerprofile")}
+                  className="py-2 px-4 bg-gray-500 hover:bg-gray-700 text-white font-medium rounded transition duration-300"
+                >
+                  Cancel
+                </button>
                 <button
                   type="button"
                   onClick={(e) =>
-                    !verified ? e.preventDefault() : updateBuyer()
+                    !verified ? e.preventDefault() : updateSeller()
                   }
                   className={`py-2 px-4 rounded font-medium ${
                     verified
@@ -289,4 +259,4 @@ const UpdateBuyer = () => {
   );
 };
 
-export default UpdateBuyer;
+export default UpdateSeller;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import Registry from "../../../artifacts/contracts/Registry.sol/Registry.json";
 import {
   Button,
@@ -77,48 +77,85 @@ const AddLand = () => {
     }
   };
 
-  useEffect(() => {
-    if (window.ethereum) {
-      const ethersProvider = new ethers.providers.Web3Provider(window.ethereum);
-      setProvider(ethersProvider);
-      console.log("Provider set:", ethersProvider);
-    } else {
-      toast.error("Please install MetaMask!");
-      console.error("MetaMask not detected");
-    }
-  }, []);
+  const connectWallet = async (ethersProvider) => {
+    if (!ethersProvider) return;
 
-  const connectWallet = async () => {
-    if (provider) {
-      try {
-        const accounts = await provider.send("eth_requestAccounts", []);
-        const ethersSigner = provider.getSigner();
-        setSigner(ethersSigner);
-        setAccount(accounts[0]);
-        console.log("Account set:", accounts[0]);
+    try {
+      const accounts = await ethersProvider.send("eth_requestAccounts", []);
+      const ethersSigner = ethersProvider.getSigner();
+      setSigner(ethersSigner);
+      setAccount(accounts[0]);
+      console.log("Account set:", accounts[0]);
 
-        const contractInstance = new ethers.Contract(
-          "0x273d42dE3e74907cD70739f58DC717dF2872F736",
-          Registry.abi,
-          ethersSigner
-        );
-        setLandInstance(contractInstance);
-        console.log("Contract instance set:", contractInstance);
+      const contractInstance = new ethers.Contract(
+        "0x273d42dE3e74907cD70739f58DC717dF2872F736",
+        Registry.abi,
+        ethersSigner
+      );
+      setLandInstance(contractInstance);
+      console.log("Contract instance set:", contractInstance);
 
-        // Check verification status
-        // const isVerified = await contractInstance.SellerVerification(accounts[0]);
-        // const isRegistered = await contractInstance.RegisteredSellerMapping(accounts[0]);
+      // Check verification status
+      // const isVerified = await contractInstance.SellerVerification(accounts[0]);
+      // const isRegistered = await contractInstance.RegisteredSellerMapping(accounts[0]);
 
-        // setVerified(isVerified);
-        // setRegistered(isRegistered);
-        setLoading(false);
-        // console.log("Verification status:", isRegistered);
-      } catch (error) {
-        console.error("Error connecting wallet:", error);
-        setLoading(false);
-      }
+      // setVerified(isVerified);
+      // setRegistered(isRegistered);
+      setLoading(false);
+      // console.log("Verification status:", isRegistered);
+    } catch (error) {
+      console.error("Error connecting wallet:", error);
+      setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const init = async () => {
+      if (window.ethereum) {
+        try {
+          const ethersProvider = new ethers.providers.Web3Provider(
+            window.ethereum
+          );
+          setProvider(ethersProvider);
+          console.log("Provider set:", ethersProvider);
+
+          // Check if we're already connected
+          const accounts = await ethersProvider.listAccounts();
+          if (accounts.length > 0) {
+            await connectWallet(ethersProvider);
+          } else {
+            setLoading(false);
+          }
+
+          // Listen for account changes
+          window.ethereum.on("accountsChanged", (accounts) => {
+            if (accounts.length > 0) {
+              connectWallet(ethersProvider);
+            } else {
+              setAccount(null);
+              setLandInstance(null);
+            }
+          });
+        } catch (error) {
+          console.error("Error initializing provider:", error);
+          setLoading(false);
+        }
+      } else {
+        toast.error("Please install MetaMask!");
+        console.error("MetaMask not detected");
+        setLoading(false);
+      }
+    };
+
+    init();
+
+    return () => {
+      // Clean up event listener
+      if (window.ethereum) {
+        window.ethereum.removeListener("accountsChanged", () => {});
+      }
+    };
+  }, []);
 
   const uploadFiles = async () => {
     if (!landImage || !aadharDocument) {
@@ -184,7 +221,7 @@ const AddLand = () => {
 
       await tx.wait();
       toast.success("Land added successfully!");
-      navigate("/");
+      navigate("/sellerdashboard");
     } catch (error) {
       console.error("Error adding land:", error);
       toast.error("Transaction failed: " + error.message);
@@ -203,6 +240,14 @@ const AddLand = () => {
     setAadharDocument(file);
   };
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
       <div className="relative py-3 sm:max-w-xl sm:mx-auto">
@@ -211,7 +256,7 @@ const AddLand = () => {
           <div className="max-w-md mx-auto">
             {!account ? (
               <button
-                onClick={connectWallet}
+                onClick={() => connectWallet(provider)}
                 className="w-full bg-gray-800 text-white py-2 px-4 rounded-md hover:bg-gray-700 mb-4"
               >
                 Connect to MetaMask
@@ -365,6 +410,17 @@ const AddLand = () => {
               </div>
             )}
           </div>
+          <Link
+            to="/sellerDashboard"
+            className={`block text-center py-2 px-4 rounded w-2/3 mx-auto my-5 ${
+              verified
+                ? "bg-blue-500 hover:bg-blue-700 text-white transition duration-300"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+            }`}
+            onClick={(e) => !verified && e.preventDefault()}
+          >
+            Return to Seller Dashboard
+          </Link>
         </div>
       </div>
     </div>
