@@ -438,7 +438,7 @@ const SellerInfo = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600">
                       <a
-                        href={`https://ipfs.io/ipfs/${seller.document}`}
+                        href={seller.document}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 hover:text-blue-800 underline"

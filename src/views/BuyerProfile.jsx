@@ -221,7 +221,7 @@ const BuyerProfile = () => {
                 </label>
                 <div className="text-blue-500">
                   <a
-                    href={`https://ipfs.io/ipfs/${buyer?.document}`}
+                    href={buyer?.document}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-500 hover:underline"
