@@ -159,7 +159,7 @@ const ViewImage = () => {
             <p className="mt-2">
               View Verified Land{" "}
               <a
-                href={`https://ipfs.io/ipfs/${land.document}`}
+                href={land.document}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-500 hover:underline"
