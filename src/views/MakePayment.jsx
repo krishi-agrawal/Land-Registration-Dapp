@@ -159,87 +159,128 @@ const MakePayment = () => {
   }
 
   return (
-    <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 min-h-screen">
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
-        <div className="p-5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-          <h2 className="text-2xl font-bold">Pending Payments</h2>
-          <p className="text-blue-100">Complete your land transactions</p>
-          <p className="text-blue-100 text-sm mt-1">₹ 1 = 0.0000057 ETH</p>
-        </div>
-
-        <div className="p-4">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead>
-                <tr className="bg-gray-50">
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    #
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Owner
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Price (in ₹)
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {lands.map((land) => (
-                  <tr
-                    key={land.id}
-                    className="hover:bg-blue-50 transition-colors"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {land.id}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-mono">
-                      {`${land.owner.substring(0, 6)}...${land.owner.substring(
-                        38
-                      )}`}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {land.price}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {land.isPaid ? (
-                        <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
-                          Paid
-                        </span>
-                      ) : (
-                        <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">
-                          Pending
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button
-                        onClick={() =>
-                          makePayment(land.owner, land.price, land.originalId)
-                        }
-                        disabled={land.isPaid}
-                        className={`px-4 py-2 rounded-md text-white shadow-sm transition-all ${
-                          land.isPaid
-                            ? "bg-gray-400 cursor-not-allowed"
-                            : "bg-blue-600 hover:bg-blue-700 hover:shadow-md"
-                        }`}
-                      >
-                        {land.isPaid ? "Completed" : "Pay Now"}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+<div className="p-6 bg-gray-50 min-h-screen">
+  <div className="max-w-6xl mx-auto">
+    {/* Header */}
+    <div className="mb-6">
+      <h1 className="text-3xl font-bold text-gray-800">Payment Center</h1>
+      <p className="text-gray-600 mt-1">Complete your land purchase transactions</p>
+    </div>
+    
+    <div className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
+      <div className="p-6 bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold">Pending Payments</h2>
+            <p className="text-blue-100 mt-1">Complete your approved land transactions</p>
+          </div>
+          <div className="bg-white/20 px-4 py-2 rounded-lg">
+            <p className="text-sm font-medium text-white">Exchange Rate: ₹ 1 = 0.0000057 ETH</p>
           </div>
         </div>
       </div>
+
+      <div className="p-6">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead>
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50 rounded-tl-lg">
+                  Land ID
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
+                  Owner Address
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
+                  Price (in ₹)
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
+                  Status
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50 rounded-tr-lg">
+                  Action
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {lands.map((land, index) => (
+                <tr
+                  key={land.id}
+                  className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
+                >
+                  <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    #{land.id}
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 font-mono">
+                    <div className="flex items-center">
+                      {`${land.owner.substring(0, 6)}...${land.owner.substring(38)}`}
+                      <button 
+                        className="ml-2 text-gray-400 hover:text-gray-600" 
+                        title="Copy address"
+                        onClick={() => navigator.clipboard.writeText(land.owner)}
+                      >
+                        <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">
+                    ₹{land.price}
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm">
+                    {land.isPaid ? (
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <svg className="h-3 w-3 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Paid
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                        <svg className="h-3 w-3 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Pending
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
+                    <button
+                      onClick={() => makePayment(land.owner, land.price, land.originalId)}
+                      disabled={land.isPaid}
+                      className={`inline-flex items-center px-4 py-2 rounded-lg transition-all ${
+                        land.isPaid
+                          ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                          : "bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-sm hover:shadow"
+                      }`}
+                    >
+                      {land.isPaid ? (
+                        <>
+                          <svg className="h-4 w-4 mr-1.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                          </svg>
+                          Completed
+                        </>
+                      ) : (
+                        <>
+                          <svg className="h-4 w-4 mr-1.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                          </svg>
+                          Pay Now
+                        </>
+                      )}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
+  </div>
+</div>
   );
 };
 

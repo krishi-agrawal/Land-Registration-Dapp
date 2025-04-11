@@ -158,76 +158,108 @@ const OwnedLands = () => {
   }
 
   return (
-    <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 min-h-screen">
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
-        <div className="p-5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-          <h2 className="text-2xl font-bold">Your Lands</h2>
-          <p className="text-blue-100">Listings you've purchased</p>
-        </div>
-
-        <div className="p-4">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead>
-                <tr className="bg-gray-50">
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    #
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Area
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    City
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    State
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Price (in ₹)
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    PID
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Survey #
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {lands.map((land) => (
-                  <tr
-                    key={land.id}
-                    className="hover:bg-blue-50 transition-colors"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {land.id}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {land.area}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {land.city}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {land.state}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {land.price}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {land.pid}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {land.surveyNumber}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+    <div className="p-6 bg-gray-50 min-h-screen">
+  <div className="max-w-6xl mx-auto">
+    {/* Header */}
+    <div className="mb-6">
+      <h1 className="text-3xl font-bold text-gray-800">My Properties</h1>
+      <p className="text-gray-600 mt-1">View all your purchased land assets</p>
+    </div>
+    
+    <div className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
+      <div className="p-6 bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+        <div className="flex items-center">
+          <div className="bg-white/20 p-3 rounded-lg mr-4">
+            <svg className="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+            </svg>
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold">Your Lands</h2>
+            <p className="text-blue-100 mt-1">Properties you've successfully purchased</p>
           </div>
         </div>
       </div>
+
+      <div className="p-6">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead>
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50 rounded-tl-lg">
+                  Land ID
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
+                  Area
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
+                  City
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
+                  State
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
+                  Price (in ₹)
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
+                  Property ID
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50 rounded-tr-lg">
+                  Survey Number
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {lands.length > 0 ? (
+                lands.map((land, index) => (
+                  <tr
+                    key={land.id}
+                    className={index % 2 === 0 ? 'bg-white hover:bg-blue-50' : 'bg-gray-50 hover:bg-blue-50'}
+                  >
+                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      #{land.id}
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
+                      {land.area}
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
+                      {land.city}
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
+                      {land.state}
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">
+                      ₹{land.price}
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 font-mono">
+                      {land.pid}
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 font-mono">
+                      {land.surveyNumber}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="7" className="px-4 py-8 text-center text-gray-500">
+                    <div className="flex flex-col items-center">
+                      <svg className="h-12 w-12 text-gray-300 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                      </svg>
+                      <p className="text-lg font-medium">No lands purchased yet</p>
+                      <p className="text-sm mt-1">When you purchase land, it will appear here</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
+  </div>
+</div>
+
   );
 };
 

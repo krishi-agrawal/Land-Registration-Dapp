@@ -167,175 +167,252 @@ const SDash = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        {/* Buyers Card */}
-        <div className="bg-gradient-to-r from-blue-400 to-blue-500 rounded-lg shadow-md overflow-hidden text-white">
-          <div className="p-6 text-center">
-            <div className="text-5xl mb-2">
-              <i className="fa fa-users"></i>
-            </div>
-            <h2 className="text-xl font-semibold mb-3">Total Buyers</h2>
-            <p className="text-3xl font-bold">{buyersCount}</p>
+    <div className="p-6 bg-gray-50 min-h-screen">
+  <div className="max-w-6xl mx-auto">
+    {/* Header */}
+    <div className="mb-8">
+      <h1 className="text-3xl font-bold text-gray-800">Seller Dashboard</h1>
+      <p className="text-gray-600 mt-1">Manage your properties and land listings</p>
+    </div>
+    
+    {/* Stats Cards */}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      {/* Buyers Card */}
+      <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-md overflow-hidden transition-transform hover:shadow-lg hover:-translate-y-1">
+        <div className="p-6 flex items-center">
+          <div className="bg-white/20 p-3 rounded-lg">
+            <svg className="h-8 w-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
           </div>
-        </div>
-
-        {/* Lands Card */}
-        <div className="bg-gradient-to-r from-orange-400 to-orange-500 rounded-lg shadow-md overflow-hidden text-white">
-          <div className="p-6 text-center">
-            <div className="text-5xl mb-2">
-              <i className="fa fa-landmark"></i>
-            </div>
-            <h2 className="text-xl font-semibold mb-3">Registered Lands</h2>
-            <p className="text-3xl font-bold">{landsCount}</p>
-          </div>
-        </div>
-
-        {/* Requests Card */}
-        <div className="bg-gradient-to-r from-indigo-400 to-indigo-500 rounded-lg shadow-md overflow-hidden text-white">
-          <div className="p-6 text-center">
-            <div className="text-5xl mb-2">
-              <i className="fa fa-bell"></i>
-            </div>
-            <h2 className="text-xl font-semibold mb-3">Total Requests</h2>
-            <p className="text-3xl font-bold">{requestsCount}</p>
+          <div className="ml-4">
+            <p className="text-blue-100 font-medium">Total Buyers</p>
+            <p className="text-3xl font-bold text-white">{buyersCount}</p>
           </div>
         </div>
       </div>
 
-      {/* Action Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        {/* Add Land Card */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="p-5 border-b border-gray-200">
-            <h5 className="text-xl font-semibold text-gray-800">
-              Wish to Add Land!
-            </h5>
+      {/* Lands Card */}
+      <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl shadow-md overflow-hidden transition-transform hover:shadow-lg hover:-translate-y-1">
+        <div className="p-6 flex items-center">
+          <div className="bg-white/20 p-3 rounded-lg">
+            <svg className="h-8 w-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
           </div>
-          <div className="p-5">
-            <Link
-              to="/sellerdashboard/addland"
-              className={`block text-center py-2 px-4 rounded ${
-                verified
-                  ? "bg-blue-500 hover:bg-blue-700 text-white transition duration-300"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              }`}
-              onClick={(e) => !verified && e.preventDefault()}
-            >
-              Add Land
-            </Link>
-          </div>
-        </div>
-
-        {/* Profile Card */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="p-5 border-b border-gray-200">
-            <h5 className="text-xl font-semibold text-gray-800">Profile</h5>
-          </div>
-          <div className="p-5">
-            <Link
-              to="/sellerdashboard/sellerprofile"
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded block text-center transition duration-300"
-            >
-              View Profile
-            </Link>
-          </div>
-        </div>
-
-        {/* Requests Card */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="p-5 border-b border-gray-200">
-            <h5 className="text-xl font-semibold text-gray-800">Requests</h5>
-          </div>
-          <div className="p-5">
-            <Link
-              to="/sellerdashboard/approverequest"
-              className={`block text-center py-2 px-4 rounded ${
-                verified
-                  ? "bg-blue-500 hover:bg-blue-700 text-white transition duration-300"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              }`}
-              onClick={(e) => !verified && e.preventDefault()}
-            >
-              View all Land Requests
-            </Link>
+          <div className="ml-4">
+            <p className="text-orange-100 font-medium">Registered Lands</p>
+            <p className="text-3xl font-bold text-white">{landsCount}</p>
           </div>
         </div>
       </div>
 
-      {/* Lands Table */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
-        <div className="p-5 border-b border-gray-200">
-          <h4 className="text-xl font-semibold text-gray-800">Lands Info</h4>
-        </div>
-        <div className="p-5 overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  #
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Area
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  City
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  State
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Price (in ₹)
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Property PID
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Survey Number
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {lands.map((land) => (
-                <tr key={land.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">{land.id}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{land.area}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{land.city}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{land.state}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {ethers.utils.formatEther(land.price)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {land.propertyPID}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {land.surveyNumber}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* View Images Card */}
-      <div className="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="p-5 border-b border-gray-200">
-          <h5 className="text-xl font-semibold text-gray-800">
-            View Images of all Lands!
-          </h5>
-        </div>
-        <div className="p-5">
-          <Link
-            to="/SellerdashBoard/viewimage"
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded block text-center transition duration-300"
-          >
-            View Images
-          </Link>
+      {/* Requests Card */}
+      <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-md overflow-hidden transition-transform hover:shadow-lg hover:-translate-y-1">
+        <div className="p-6 flex items-center">
+          <div className="bg-white/20 p-3 rounded-lg">
+            <svg className="h-8 w-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+          </div>
+          <div className="ml-4">
+            <p className="text-purple-100 font-medium">Total Requests</p>
+            <p className="text-3xl font-bold text-white">{requestsCount}</p>
+          </div>
         </div>
       </div>
     </div>
+
+    {/* Action Cards */}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      {/* Add Land Card */}
+      <div className="bg-white rounded-xl shadow-md overflow-hidden transition-transform hover:shadow-lg hover:-translate-y-1">
+        <div className="p-5 border-b border-gray-100">
+          <div className="flex items-center">
+            <svg className="h-5 w-5 text-gray-700 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h5 className="text-lg font-bold text-gray-800">Add New Land</h5>
+          </div>
+        </div>
+        <div className="p-5">
+          <p className="text-gray-600 mb-4">Register a new land property.</p>
+          <button
+            onClick={() => window.location.href = "/sellerdashboard/addland"}
+            disabled={!verified}
+            className={`flex items-center justify-between w-full text-white font-medium py-2 px-4 rounded-lg transition-colors ${
+              verified
+                ? "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+            }`}
+          >
+            <span>Add Land</span>
+            <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Profile Card */}
+      <div className="bg-white rounded-xl shadow-md overflow-hidden transition-transform hover:shadow-lg hover:-translate-y-1">
+        <div className="p-5 border-b border-gray-100">
+          <div className="flex items-center">
+            <svg className="h-5 w-5 text-gray-700 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            <h5 className="text-lg font-bold text-gray-800">Profile</h5>
+          </div>
+        </div>
+        <div className="p-5">
+          <p className="text-gray-600 mb-4">View and manage your seller profile</p>
+          <button
+            onClick={() => window.location.href = "/sellerdashboard/sellerprofile"}
+            className="flex items-center justify-between w-full text-white font-medium py-2 px-4 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-colors"
+          >
+            <span>View Profile</span>
+            <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Requests Card */}
+      <div className="bg-white rounded-xl shadow-md overflow-hidden transition-transform hover:shadow-lg hover:-translate-y-1">
+        <div className="p-5 border-b border-gray-100">
+          <div className="flex items-center">
+            <svg className="h-5 w-5 text-gray-700 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            <h5 className="text-lg font-bold text-gray-800">Land Requests</h5>
+          </div>
+        </div>
+        <div className="p-5">
+          <p className="text-gray-600 mb-4">View and approve requests for your lands</p>
+          <button
+            onClick={() => verified && (window.location.href = "/sellerdashboard/approverequest")}
+            disabled={!verified}
+            className={`flex items-center justify-between w-full font-medium py-2 px-4 rounded-lg transition-colors ${
+              verified
+                ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+            }`}
+          >
+            <span>View Requests</span>
+            <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    {/* Lands Table */}
+    <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8">
+      <div className="p-5 border-b border-gray-100 flex items-center">
+        <svg className="h-5 w-5 text-gray-700 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        </svg>
+        <h4 className="text-lg font-bold text-gray-800">Your Registered Lands</h4>
+      </div>
+      <div className="p-5 overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead>
+            <tr>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50 rounded-tl-lg">
+                Land ID
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
+                Area
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
+                City
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
+                State
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
+                Price (in ₹)
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
+                Property PID
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50 rounded-tr-lg">
+                Survey Number
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {lands.length > 0 ? (
+              lands.map((land, index) => (
+                <tr key={land.id} className={index % 2 === 0 ? 'bg-white hover:bg-blue-50' : 'bg-gray-50 hover:bg-blue-50'}>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    #{land.id}
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
+                    {land.area}
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
+                    {land.city}
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
+                    {land.state}
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">
+                    ₹{ethers.utils.formatEther(land.price)}
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 font-mono">
+                    {land.propertyPID}
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 font-mono">
+                    {land.surveyNumber}
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="7" className="px-4 py-8 text-center text-gray-500">
+                  <div className="flex flex-col items-center">
+                    <svg className="h-12 w-12 text-gray-300 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    <p className="text-lg font-medium">No lands registered yet</p>
+                    <p className="text-sm mt-1">Add your first land by clicking the "Add Land" button above</p>
+                  </div>
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {/* View Images Card */}
+    <div className="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden transition-transform hover:shadow-lg hover:-translate-y-1">
+      <div className="p-5 border-b border-gray-100">
+        <div className="flex items-center">
+          <svg className="h-5 w-5 text-gray-700 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <h5 className="text-lg font-bold text-gray-800">Land Images Gallery</h5>
+        </div>
+      </div>
+      <div className="p-5">
+        <p className="text-gray-600 mb-4">Browse all images of registered land properties</p>
+        <button
+          onClick={() => window.location.href = "/SellerdashBoard/viewimage"}
+          className="flex items-center justify-between w-full text-white font-medium py-2 px-4 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-colors"
+        >
+          <span>View Images</span>
+          <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
   );
 };
 

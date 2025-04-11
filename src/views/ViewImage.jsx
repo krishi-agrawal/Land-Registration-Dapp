@@ -204,22 +204,49 @@ const ViewImage = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-wrap -mx-4">
-        {state.lands.map(renderLandCard)}
+<div className="bg-gray-50 min-h-screen p-6">
+  <div className="container mx-auto">
+    {/* Header */}
+    <div className="mb-6 text-center">
+      <h1 className="text-3xl font-bold text-gray-800">Land Gallery</h1>
+      <p className="text-gray-600 mt-1">View images of your registered properties</p>
+    </div>
+    
+    {/* Gallery Grid */}
+    <div className="flex flex-wrap -mx-4">
+      {state.lands.map(renderLandCard)}
+    </div>
+    
+    {/* Empty state - displayed when no lands are available */}
+    {state.lands.length === 0 && (
+      <div className="text-center py-16 px-4">
+        <svg className="h-16 w-16 text-gray-300 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        <h3 className="text-lg font-medium text-gray-800 mb-2">No land images yet</h3>
+        <p className="text-gray-500">When you register land properties, their images will appear here</p>
       </div>
-      <Link
-        to="/sellerDashboard"
-        className={`block text-center py-2 px-4 rounded w-2/3 mx-auto ${
+    )}
+    
+    {/* Return Button */}
+    <div className="mt-8 text-center">
+      <button
+        onClick={() => state.verified && (window.location.href = "/sellerDashboard")}
+        className={`inline-flex items-center justify-center py-2.5 px-6 rounded-lg font-medium shadow-sm ${
           state.verified
-            ? "bg-blue-500 hover:bg-blue-700 text-white transition duration-300"
+            ? "bg-blue-500 hover:bg-blue-600 text-white transition-colors"
             : "bg-gray-300 text-gray-500 cursor-not-allowed"
         }`}
-        onClick={(e) => !state.verified && e.preventDefault()}
+        disabled={!state.verified}
       >
-        Return to Seller Dashboard
-      </Link>
+        <svg className="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
+        </svg>
+        Return to Dashboard
+      </button>
     </div>
+  </div>
+</div>
   );
 };
 

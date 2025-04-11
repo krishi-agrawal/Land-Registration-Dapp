@@ -120,119 +120,155 @@ const SellerProfile = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-3xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-            <h5 className="text-xl font-bold text-gray-800">Seller Profile</h5>
-            <div className="verification-status">{getVerificationStatus()}</div>
-          </div>
+    <div className="bg-gray-50 min-h-screen p-6">
+  <div className="max-w-3xl mx-auto">
+    {/* Header */}
+    <div className="mb-6">
+      <h1 className="text-3xl font-bold text-gray-800">Profile Details</h1>
+      <p className="text-gray-600 mt-1">View and manage your seller information</p>
+    </div>
+    
+    <div className="bg-white rounded-xl shadow-md overflow-hidden">
+      <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+        <div className="flex items-center">
+          <svg className="h-5 w-5 text-gray-700 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+          <h5 className="text-xl font-bold text-gray-800">Seller Profile</h5>
+        </div>
+        <div className="verification-status">{getVerificationStatus()}</div>
+      </div>
 
-          <div className="p-6">
-            <form>
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Your Wallet Address:
-                </label>
+      <div className="p-6">
+        <form>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="col-span-2">
+              <label className="block text-gray-700 text-sm font-semibold mb-2">
+                Your Wallet Address
+              </label>
+              <div className="flex">
                 <input
                   disabled
                   type="text"
                   value={seller?.walletAddress}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-100"
+                  className="flex-grow shadow-sm border border-gray-200 rounded-lg py-2.5 px-4 text-gray-700 font-mono bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
+                <button 
+                  type="button" 
+                  className="ml-2 px-3 py-2 bg-gray-100 rounded-lg text-gray-500 hover:bg-gray-200 transition-colors"
+                  title="Copy address"
+                  onClick={() => {
+                    navigator.clipboard.writeText(seller?.walletAddress);
+                  }}
+                >
+                  <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                </button>
               </div>
+            </div>
 
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Name
-                </label>
-                <input
-                  disabled
-                  type="text"
-                  value={seller?.name}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-100"
-                />
-              </div>
+            <div>
+              <label className="block text-gray-700 text-sm font-semibold mb-2">
+                Name
+              </label>
+              <input
+                disabled
+                type="text"
+                value={seller?.name}
+                className="shadow-sm border border-gray-200 rounded-lg w-full py-2.5 px-4 text-gray-700 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
 
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Age
-                </label>
-                <input
-                  disabled
-                  type="text"
-                  value={seller?.age}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-100"
-                />
-              </div>
+            <div>
+              <label className="block text-gray-700 text-sm font-semibold mb-2">
+                Age
+              </label>
+              <input
+                disabled
+                type="text"
+                value={seller?.age}
+                className="shadow-sm border border-gray-200 rounded-lg w-full py-2.5 px-4 text-gray-700 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
 
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Aadhar Number
-                </label>
-                <input
-                  disabled
-                  type="text"
-                  value={seller?.aadharNumber}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-100"
-                />
-              </div>
+            <div>
+              <label className="block text-gray-700 text-sm font-semibold mb-2">
+                Aadhar Number
+              </label>
+              <input
+                disabled
+                type="text"
+                value={seller?.aadharNumber}
+                className="shadow-sm border border-gray-200 rounded-lg w-full py-2.5 px-4 text-gray-700 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
 
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Pan Number
-                </label>
-                <input
-                  disabled
-                  type="text"
-                  value={seller?.panNumber}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-100"
-                />
-              </div>
+            <div>
+              <label className="block text-gray-700 text-sm font-semibold mb-2">
+                PAN Number
+              </label>
+              <input
+                disabled
+                type="text"
+                value={seller?.panNumber}
+                className="shadow-sm border border-gray-200 rounded-lg w-full py-2.5 px-4 text-gray-700 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
 
-              <div className="mb-6">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Your Aadhar Document
-                </label>
-                <div className="text-blue-500">
-                  <a
-                    href={`https://ipfs.io/ipfs/${seller?.document}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-500 hover:underline"
-                  >
-                    Here
-                  </a>
-                </div>
-              </div>
-
-              <Link
-                to="/sellerdashboard/updateseller"
-                className={`py-2 px-4 rounded font-medium ${
-                  verified
-                    ? "bg-blue-500 hover:bg-blue-700 text-white transition duration-300"
-                    : "bg-gray-300 text-gray-500"
-                }`}
-                onClick={(e) => !verified && e.preventDefault()}
+            <div className="col-span-2">
+              <label className="block text-gray-700 text-sm font-semibold mb-2">
+                Your Aadhar Document
+              </label>
+              <button
+                type="button"
+                onClick={() => window.open(`https://ipfs.io/ipfs/${seller?.document}`, '_blank')}
+                className="inline-flex items-center px-4 py-2 border border-blue-200 rounded-lg text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors"
               >
-                Edit Profile
-              </Link>
-            </form>
+                <svg className="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                View Document
+              </button>
+            </div>
           </div>
-        </div>
-        <Link
-          to="/sellerDashboard"
-          className={`block text-center py-2 px-4 rounded w-2/3 mx-auto my-5 ${
-            verified
-              ? "bg-blue-500 hover:bg-blue-700 text-white transition duration-300"
-              : "bg-gray-300 text-gray-500 cursor-not-allowed"
-          }`}
-          onClick={(e) => !verified && e.preventDefault()}
-        >
-          Return to Seller Dashboard
-        </Link>
+
+          <div className="mt-8 border-t border-gray-100 pt-6 flex justify-between">
+            <button
+              type="button"
+              onClick={() => window.location.href = "/sellerDashboard"}
+              className="inline-flex items-center px-4 py-2 rounded-lg font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+            >
+              <svg className="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
+              </svg>
+              Back to Dashboard
+            </button>
+            
+            <button
+              type="button"
+              onClick={() => {
+                if (verified) {
+                  window.location.href = "/sellerdashboard/updateseller";
+                }
+              }}
+              className={`inline-flex items-center px-4 py-2 rounded-lg font-medium ${
+                verified 
+                  ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-sm hover:shadow transition-all" 
+                  : "bg-gray-200 text-gray-400 cursor-not-allowed"
+              }`}
+            >
+              <svg className="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+              Edit Profile
+            </button>
+          </div>
+        </form>
       </div>
     </div>
+  </div>
+</div>
   );
 };
 
