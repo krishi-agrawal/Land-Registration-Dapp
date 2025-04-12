@@ -19,8 +19,8 @@ const TransactionInfo = () => {
     const initialize = async () => {
       try {
         // For refreshing page only once
-        if (!window.location.hash) {
-          window.location = window.location + "#loaded";
+        if (!localStorage.getItem("pageLoaded")) {
+          localStorage.setItem("pageLoaded", "true");
           window.location.reload();
         }
 
@@ -81,45 +81,47 @@ const TransactionInfo = () => {
 
       const landsList = [];
       const filteredLands = [];
-
       for (let i = 1; i <= landsCount; i++) {
-        const [
-          owner,
-          area,
-          city,
-          state,
-          price,
-          pid,
-          surveyNumber,
-          request,
-          isPaid,
-        ] = await Promise.all([
-          contract.getLandOwner(i),
-          contract.getArea(i),
-          contract.getCity(i),
-          contract.getState(i),
-          contract.getPrice(i),
-          contract.getPID(i),
-          contract.getSurveyNumber(i),
-          contract.getRequestDetails(i),
-          contract.isPaid(i),
-        ]);
+        const isRequested = await contract.isRequested(i);
+        if (isRequested) {
+          const [
+            owner,
+            area,
+            city,
+            state,
+            price,
+            pid,
+            surveyNumber,
+            request,
+            isPaid,
+          ] = await Promise.all([
+            contract.getLandOwner(i),
+            contract.getArea(i),
+            contract.getCity(i),
+            contract.getState(i),
+            contract.getPrice(i),
+            contract.getPID(i),
+            contract.getSurveyNumber(i),
+            contract.getRequestDetails(i),
+            contract.isPaid(i),
+          ]);
 
-        const transferCompleted = request[1] === owner;
+          const transferCompleted = request[1] === owner;
 
-        landsList.push({
-          originalId: i, // Keep original ID for reference
-          owner,
-          area: area.toString(),
-          city,
-          state,
-          price: ethers.utils.formatEther(price),
-          pid: pid.toNumber(),
-          surveyNumber: surveyNumber.toString(),
-          request,
-          isPaid,
-          transferCompleted,
-        });
+          landsList.push({
+            originalId: i, // Keep original ID for reference
+            owner,
+            area: area.toString(),
+            city,
+            state,
+            price: ethers.utils.formatEther(price),
+            pid: pid.toNumber(),
+            surveyNumber: surveyNumber.toString(),
+            request,
+            isPaid,
+            transferCompleted,
+          });
+        }
       }
 
       // Update IDs to be sequential starting from 1
