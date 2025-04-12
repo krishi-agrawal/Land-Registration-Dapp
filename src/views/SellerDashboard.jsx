@@ -72,8 +72,8 @@ const SDash = () => {
 
   const loadContractData = async (contractInstance, currentAccount) => {
     try {
-      console.log("Connected account:", currentAccount);
-      console.log("Contract initialized:", contractInstance.address);
+      // console.log("Connected account:", currentAccount);
+      // console.log("Contract initialized:", contractInstance.address);
 
       // Reset global arrays
       row = [];
@@ -97,7 +97,7 @@ const SDash = () => {
       const requestsTotal = await contractInstance.requestsCount();
 
       setLandsCount(landsTotal.toNumber());
-      console.log("Landtotal: ", landsTotal.toNumber());
+      // console.log("Landtotal: ", landsTotal.toNumber());
       setBuyersCount(buyersTotal.toNumber());
       setRequestsCount(requestsTotal.toNumber());
 
@@ -333,7 +333,7 @@ const SDash = () => {
                 State
               </th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
-                Price (in ₹)
+                Price (in ETH)
               </th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
                 Property PID
@@ -360,7 +360,7 @@ const SDash = () => {
                     {land.state}
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">
-                    ₹{ethers.utils.formatEther(land.price)}
+                    {ethers.utils.formatEther(land.price)} ETH
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 font-mono">
                     {land.propertyPID}

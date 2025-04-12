@@ -192,7 +192,7 @@ const MakePayment = () => {
                   Owner Address
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
-                  Price (in ₹)
+                  Price (in ETH)
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
                   Status
@@ -226,7 +226,7 @@ const MakePayment = () => {
                     </div>
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">
-                    ₹{land.price}
+                    {land.price} ETH
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm">
                     {land.isPaid ? (

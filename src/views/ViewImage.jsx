@@ -155,7 +155,7 @@ const ViewImage = () => {
             Survey No.: {land.surveyNumber}
           </p>
           <div className="border-t pt-3">
-            <p className="text-lg font-semibold">Price: ₹ {land.price}</p>
+            <p className="text-lg font-semibold">Price: {land.price} ETH</p>
             <p className="mt-2">
               View Verified Land{" "}
               <a
