@@ -21,6 +21,7 @@ import LIDashboard from "./views/LIDashboard.jsx";
 import OwnedLands from "./views/OwnedLands.jsx";
 import MakePayment from "./views/MakePayment.jsx";
 import TransactionInfo from "./views/TransactionInfo.jsx";
+import ProcessFlowChart from "./ProcessFLowChart.jsx";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -31,6 +32,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/Vanta" element={<VantaGlobe />} />
+          <Route path="/ProcessFlowChart" element={<ProcessFlowChart />} />
           <Route path="/registerbuyer" element={<RegisterBuyer />} />
           <Route path="/registerseller" element={<RegisterSeller />} />
           {/* Seller */}
