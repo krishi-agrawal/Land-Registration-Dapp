@@ -1,122 +1,68 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
-import Registry from "../artifacts/contracts/Registry.sol/Registry.json";
 import { useNavigate } from "react-router-dom";
-
+import { useWallet } from "../contexts/WalletContext";
 const BuyerInfo = () => {
-  // State variables
+  const navigate = useNavigate();
 
-  const [signer, setSigner] = useState(null);
-  const [landContract, setLandContract] = useState(null);
-  const [account, setAccount] = useState("");
+  // Use wallet context for wallet-related state
+  const {
+    account,
+    contract: landContract,
+    isLandInspector: isInspector,
+    loading: walletLoading,
+  } = useWallet();
   const [loading, setLoading] = useState(true);
   const [processingTx, setProcessingTx] = useState(false);
-  const [isInspector, setIsInspector] = useState(true);
   const [buyersList, setBuyersList] = useState([]);
-
-  const navigate = useNavigate();
 
   // Connect to MetaMask
   useEffect(() => {
-    if (window.ethereum) {
-      const ethersProvider = new ethers.providers.Web3Provider(window.ethereum);
+    const loadBuyerData = async (contract) => {
+      try {
+        let buyersCount = await contract.buyersCount();
 
-      connectWallet(ethersProvider);
-    } else {
-      alert("Please install MetaMask!");
-    }
-  }, []);
-  useEffect(() => {
-    if (!localStorage.getItem("pageLoaded")) {
-      localStorage.setItem("pageLoaded", "true");
-      window.location.reload();
-    }
-  }, []);
+        // Create array to store buyer info
+        const buyers = [];
 
-  const connectWallet = async (provider) => {
-    try {
-      const accounts = await provider.send("eth_requestAccounts", []);
-      const ethersSigner = provider.getSigner();
-      setSigner(ethersSigner);
-      setAccount(accounts[0]);
+        // Loop through each buyer index to get the address first
+        for (let i = 0; i < buyersCount; i++) {
+          // Get buyer address from the buyers array using the auto-generated getter
+          const address = await contract.buyers(i);
 
-      const landContractInstance = new ethers.Contract(
-        "0x273d42dE3e74907cD70739f58DC717dF2872F736",
-        Registry.abi,
-        ethersSigner
-      );
-      setLandContract(landContractInstance);
-      console.log("Contract:", landContractInstance);
-      console.log(
-        "Is buyer: ",
-        await landContractInstance.isBuyer(
-          "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
-        )
-      );
-      console.log("Connected to contract:", await landContractInstance.address);
+          // Get buyer details, verification status, and rejection status
+          const [buyerDetails, isVerified, isRejected] = await Promise.all([
+            contract.BuyerMapping(address),
+            contract.BuyerVerification(address),
+            contract.BuyerRejection(address),
+          ]);
 
-      // Check if current user is an inspector
-      // const verificationStatus = await landContractInstance.isLandInspector(accounts[0]);
-      // setIsInspector(verificationStatus);
+          // Format buyer data
+          buyers.push({
+            id: i + 1,
+            address: address,
+            name: buyerDetails.name,
+            age: buyerDetails.age.toNumber(),
+            city: buyerDetails.city,
+            aadharNumber: buyerDetails.aadharNumber,
+            panNumber: buyerDetails.panNumber,
+            document: buyerDetails.document,
+            email: buyerDetails.email,
+            isVerified: isVerified,
+            isRejected: isRejected,
+          });
+        }
 
-      // Load buyers data
-      await loadBuyerData(landContractInstance);
-    } catch (error) {
-      console.error("Error connecting wallet:", error);
-      alert("Failed to connect. Please check your wallet connection.");
-    } finally {
-    }
-  };
-
-  // Load all buyer data
-  const loadBuyerData = async (contract) => {
-    try {
-      console.log(
-        "Is buyer: ",
-        await contract.isBuyer("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
-      );
-      let buyersCount = await contract.buyersCount();
-      console.log("Buyers count:", buyersCount);
-
-      // Create array to store buyer info
-      const buyers = [];
-
-      // Loop through each buyer index to get the address first
-      for (let i = 0; i < buyersCount; i++) {
-        // Get buyer address from the buyers array using the auto-generated getter
-        const address = await contract.buyers(i);
-
-        // Get buyer details, verification status, and rejection status
-        const [buyerDetails, isVerified, isRejected] = await Promise.all([
-          contract.BuyerMapping(address),
-          contract.BuyerVerification(address),
-          contract.BuyerRejection(address),
-        ]);
-
-        // Format buyer data
-        buyers.push({
-          id: i + 1,
-          address: address,
-          name: buyerDetails.name,
-          age: buyerDetails.age.toNumber(),
-          city: buyerDetails.city,
-          aadharNumber: buyerDetails.aadharNumber,
-          panNumber: buyerDetails.panNumber,
-          document: buyerDetails.document,
-          email: buyerDetails.email,
-          isVerified: isVerified,
-          isRejected: isRejected,
-        });
+        setBuyersList(buyers);
+      } catch (error) {
+        console.error("Error loading buyer data:", error);
+        alert("Failed to load buyer information");
+      } finally {
+        setLoading(false);
       }
-
-      setBuyersList(buyers);
-    } catch (error) {
-      console.error("Error loading buyer data:", error);
-      alert("Failed to load buyer information");
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+    if (landContract) loadBuyerData(landContract);
+  }, [landContract]);
 
   // Verify a buyer
   const verifyBuyer = async (address) => {
@@ -170,7 +116,7 @@ const BuyerInfo = () => {
   };
 
   // Loading state
-  if (loading) {
+  if (walletLoading || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>

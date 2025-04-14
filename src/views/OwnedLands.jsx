@@ -1,105 +1,58 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { useNavigate } from "react-router-dom";
-import Land from "../../artifacts/contracts/Registry.sol/Registry.json";
+import { useWallet } from "../contexts/WalletContext";
 
 const OwnedLands = () => {
-  const [landContract, setLandContract] = useState(null);
-  const [account, setAccount] = useState(null);
-  const [provider, setProvider] = useState(null);
-  const [signer, setSigner] = useState(null);
-  const [isVerified, setIsVerified] = useState(false);
-  const [isRegistered, setIsRegistered] = useState(false);
+  const {
+    account,
+    contract,
+    isBuyer: isRegistered,
+    isVerified,
+    isRejected,
+    loading,
+  } = useWallet();
   const [lands, setLands] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const navigate = useNavigate();
-  const contractAddress = "0x273d42dE3e74907cD70739f58DC717dF2872F736";
-
   useEffect(() => {
-    const initialize = async () => {
+    const fetchLandData = async (contract, currentAddress) => {
       try {
-        // For refreshing page only once
-        if (!localStorage.getItem("pageLoaded")) {
-          localStorage.setItem("pageLoaded", "true");
-          window.location.reload();
+        setIsLoading(true);
+
+        // Get total lands count in a single call
+        const count = await contract.getLandsCount();
+        const landsCount = parseInt(count.toString());
+
+        // First fetch all owner addresses in parallel
+        const ownerPromises = [];
+        for (let i = 1; i <= landsCount; i++) {
+          ownerPromises.push(contract.getLandOwner(i));
         }
 
-        // Initialize provider and connect wallet
-        if (window.ethereum) {
-          const ethersProvider = new ethers.providers.Web3Provider(
-            window.ethereum
-          );
-          setProvider(ethersProvider);
-          await connectWallet(ethersProvider);
-        } else {
-          alert("Please install MetaMask!");
+        const allOwners = await Promise.all(ownerPromises);
+
+        // Filter land IDs that belong to current user before fetching additional data
+        const relevantLandIds = [];
+        for (let i = 0; i < allOwners.length; i++) {
+          if (allOwners[i].toLowerCase() === currentAddress.toLowerCase()) {
+            relevantLandIds.push(i + 1); // Add 1 because IDs start from 1
+          }
         }
-      } catch (error) {
-        console.error("Initialization error:", error);
-        alert("Failed to initialize. Check console for details.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
 
-    initialize();
-  }, []);
-
-  const connectWallet = async (provider) => {
-    try {
-      const accounts = await provider.send("eth_requestAccounts", []);
-      const ethersSigner = provider.getSigner();
-      setSigner(ethersSigner);
-      setAccount(accounts[0]);
-
-      const contractInstance = new ethers.Contract(
-        contractAddress,
-        Land.abi,
-        ethersSigner
-      );
-      setLandContract(contractInstance);
-
-      // Check verification and registration status
-      const [verified, registered] = await Promise.all([
-        contractInstance.isVerified(accounts[0]),
-        contractInstance.isBuyer(accounts[0]),
-      ]);
-      setIsVerified(verified);
-      setIsRegistered(registered);
-
-      // Load lands data
-      await fetchLandData(contractInstance, accounts[0]);
-    } catch (error) {
-      console.error("Error connecting wallet:", error);
-      throw error;
-    }
-  };
-
-  const fetchLandData = async (contract, currentAddress) => {
-    try {
-      setIsLoading(true);
-      const count = await contract.getLandsCount();
-      const landsCount = parseInt(count.toString());
-
-      const landsList = [];
-      let idx = 0;
-      for (let i = 1; i <= landsCount; i++) {
-        const owner = await contract.getLandOwner(i);
-        if (owner.toLowerCase() === currentAddress.toLowerCase()) {
-          idx++;
-          const [area, city, state, price, pid, surveyNumber] =
-            await Promise.all([
-              contract.getArea(i),
-              contract.getCity(i),
-              contract.getState(i),
-              contract.getPrice(i),
-              contract.getPID(i),
-              contract.getSurveyNumber(i),
-            ]);
-
-          landsList.push({
-            id: idx,
+        // Only fetch additional data for lands that belong to the current user
+        const landDataPromises = relevantLandIds.map((landId, index) => {
+          return Promise.all([
+            Promise.resolve(allOwners[landId - 1]), // Use already fetched owner
+            contract.getArea(landId),
+            contract.getCity(landId),
+            contract.getState(landId),
+            contract.getPrice(landId),
+            contract.getPID(landId),
+            contract.getSurveyNumber(landId),
+          ]).then(([owner, area, city, state, price, pid, surveyNumber]) => ({
+            id: index + 1, // Sequential ID for display
             owner,
             area: area.toString(),
             city,
@@ -107,17 +60,21 @@ const OwnedLands = () => {
             price: ethers.utils.formatEther(price),
             pid: pid.toNumber(),
             surveyNumber: surveyNumber.toString(),
-          });
-        }
+          }));
+        });
+
+        const landsList = await Promise.all(landDataPromises);
+
+        setLands(landsList);
+      } catch (error) {
+        console.error("Error fetching land data:", error);
+        throw error;
+      } finally {
+        setIsLoading(false);
       }
-      setLands(landsList);
-    } catch (error) {
-      console.error("Error fetching land data:", error);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    };
+    if (contract && account) fetchLandData(contract, account);
+  }, [contract, account]);
 
   // UI Rendering
   if (isLoading) {
@@ -130,7 +87,7 @@ const OwnedLands = () => {
     );
   }
 
-  if (!landContract) {
+  if (!contract) {
     return (
       <div className="p-8">
         <div className="bg-white rounded-lg shadow-lg p-6">
@@ -159,107 +116,143 @@ const OwnedLands = () => {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-  <div className="max-w-6xl mx-auto">
-    {/* Header */}
-    <div className="mb-6">
-      <h1 className="text-3xl font-bold text-gray-800">My Properties</h1>
-      <p className="text-gray-600 mt-1">View all your purchased land assets</p>
-    </div>
-    
-    <div className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
-      <div className="p-6 bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-        <div className="flex items-center">
-          <div className="bg-white/20 p-3 rounded-lg mr-4">
-            <svg className="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-            </svg>
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold">Your Lands</h2>
-            <p className="text-blue-100 mt-1">Properties you've successfully purchased</p>
-          </div>
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-800">My Properties</h1>
+          <p className="text-gray-600 mt-1">
+            View all your purchased land assets
+          </p>
         </div>
-      </div>
 
-      <div className="p-6">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead>
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50 rounded-tl-lg">
-                  Land ID
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
-                  Area
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
-                  City
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
-                  State
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
-                  Price (in ETH)
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
-                  Property ID
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50 rounded-tr-lg">
-                  Survey Number
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {lands.length > 0 ? (
-                lands.map((land, index) => (
-                  <tr
-                    key={land.id}
-                    className={index % 2 === 0 ? 'bg-white hover:bg-blue-50' : 'bg-gray-50 hover:bg-blue-50'}
-                  >
-                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      #{land.id}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                      {land.area}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                      {land.city}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                      {land.state}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">
-                      {land.price} ETH
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 font-mono">
-                      {land.pid}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 font-mono">
-                      {land.surveyNumber}
-                    </td>
+        <div className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
+          <div className="p-6 bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+            <div className="flex items-center">
+              <div className="bg-white/20 p-3 rounded-lg mr-4">
+                <svg
+                  className="h-6 w-6 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
+                  />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold">Your Lands</h2>
+                <p className="text-blue-100 mt-1">
+                  Properties you've successfully purchased
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-6">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead>
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50 rounded-tl-lg">
+                      Land ID
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
+                      Area
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
+                      City
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
+                      State
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
+                      Price (in ETH)
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
+                      Property ID
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50 rounded-tr-lg">
+                      Survey Number
+                    </th>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="7" className="px-4 py-8 text-center text-gray-500">
-                    <div className="flex flex-col items-center">
-                      <svg className="h-12 w-12 text-gray-300 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                      </svg>
-                      <p className="text-lg font-medium">No lands purchased yet</p>
-                      <p className="text-sm mt-1">When you purchase land, it will appear here</p>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {lands.length > 0 ? (
+                    lands.map((land, index) => (
+                      <tr
+                        key={land.id}
+                        className={
+                          index % 2 === 0
+                            ? "bg-white hover:bg-blue-50"
+                            : "bg-gray-50 hover:bg-blue-50"
+                        }
+                      >
+                        <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          #{land.id}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
+                          {land.area}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
+                          {land.city}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
+                          {land.state}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">
+                          {land.price} ETH
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 font-mono">
+                          {land.pid}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 font-mono">
+                          {land.surveyNumber}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan="7"
+                        className="px-4 py-8 text-center text-gray-500"
+                      >
+                        <div className="flex flex-col items-center">
+                          <svg
+                            className="h-12 w-12 text-gray-300 mb-3"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
+                            />
+                          </svg>
+                          <p className="text-lg font-medium">
+                            No lands purchased yet
+                          </p>
+                          <p className="text-sm mt-1">
+                            When you purchase land, it will appear here
+                          </p>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</div>
-
   );
 };
 

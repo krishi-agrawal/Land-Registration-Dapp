@@ -1,134 +1,79 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
-import Registry from "../artifacts/contracts/Registry.sol/Registry.json";
 import { useNavigate } from "react-router-dom";
+import { useWallet } from "../contexts/WalletContext";
 
 const SellerInfo = () => {
-  // State variables
-  const [provider, setProvider] = useState(null);
-  const [signer, setSigner] = useState(null);
-  const [landContract, setLandContract] = useState(null);
-  const [account, setAccount] = useState("");
+  const navigate = useNavigate();
+
+  // Use wallet context for wallet-related state
+  const {
+    account,
+    contract: landContract,
+    isLandInspector: isInspector,
+    loading: walletLoading,
+  } = useWallet();
   const [loading, setLoading] = useState(true);
   const [processingTx, setProcessingTx] = useState(false);
-  const [isInspector, setIsInspector] = useState(true);
   const [sellersList, setSellersList] = useState([]);
-
-  const navigate = useNavigate();
 
   // Connect to MetaMask
   useEffect(() => {
-    if (window.ethereum) {
-      const ethersProvider = new ethers.providers.Web3Provider(window.ethereum);
-      setProvider(ethersProvider);
+    const loadSellerData = async (contract) => {
+      try {
+        // setLoading(true);
 
-      connectWallet(ethersProvider);
-    } else {
-      alert("Please install MetaMask!");
-      // setLoading(false);
-    }
-  }, []);
+        // Get total sellers count
+        // const aa = await landContract.sellers (0)
+        // console.log("aaa: ", aa)
+        console.log(
+          "Is seller: ",
+          contract.isSeller("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
+        );
+        let sellersCount = await contract.sellersCount();
+        console.log("Sellers count:", sellersCount);
 
-  const connectWallet = async (ethersProvider) => {
-    try {
-      const accounts = await ethersProvider.send("eth_requestAccounts", []);
-      const ethersSigner = ethersProvider.getSigner();
-      setSigner(ethersSigner);
-      setAccount(accounts[0]);
+        // Create array to store seller info
+        const sellers = [];
 
-      // Get network and contract
-      // const { chainId } = await ethersProvider.getNetwork();
-      // const deployedNetwork = Land.networks[chainId];
+        // Loop through each seller index to get the address first
+        for (let i = 0; i < sellersCount; i++) {
+          // Get seller address from the sellers array using the auto-generated getter
+          const address = await contract.sellers(i);
 
-      // if (!deployedNetwork) {
-      //   alert("Please connect to the correct network");
-      //   setLoading(false);
-      //   return;
-      // }
+          // Get seller details, verification status, and rejection status
+          const [sellerDetails, isVerified, isRejected] = await Promise.all([
+            contract.SellerMapping(address),
+            contract.SellerVerification(address),
+            contract.SellerRejection(address),
+          ]);
 
-      const landContractInstance = new ethers.Contract(
-        "0x273d42dE3e74907cD70739f58DC717dF2872F736",
-        Registry.abi,
-        ethersSigner
-      );
-      setLandContract(landContractInstance);
-      console.log("COntract:", landContractInstance);
-      console.log(
-        "Is seller: ",
-        await landContractInstance.isSeller(
-          "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
-        )
-      );
-      console.log("Connected to contract:", await landContractInstance.address);
-      // console.log("Available methods:", Object.keys(landContractInstance.functions));
+          // Format seller data
+          sellers.push({
+            id: i + 1,
+            address: address,
+            name: sellerDetails.name,
+            age: sellerDetails.age.toNumber(),
+            aadharNumber: sellerDetails.aadharNumber,
+            panNumber: sellerDetails.panNumber,
+            document: sellerDetails.document,
+            isVerified: isVerified,
+            isRejected: isRejected,
+          });
+        }
 
-      // Check if current user is an inspector
-      // const verificationStatus = await landContractInstance.isLandInspector(accounts[0]);
-      // setIsInspector(verificationStatus);
-
-      // Load sellers data
-      // setLoading(false);
-      await loadSellerData(landContractInstance);
-    } catch (error) {
-      console.error("Error connecting wallet:", error);
-      alert("Failed to connect. Please check your wallet connection.");
-    } finally {
-    }
-  };
+        setSellersList(sellers);
+      } catch (error) {
+        console.error("Error loading seller data:", error);
+        alert("Failed to load seller information");
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (landContract) loadSellerData(landContract);
+  }, [landContract]);
 
   // Load all seller data
-  const loadSellerData = async (contract) => {
-    try {
-      // setLoading(true);
-
-      // Get total sellers count
-      // const aa = await landContract.sellers (0)
-      // console.log("aaa: ", aa)
-      console.log(
-        "Is seller: ",
-        contract.isSeller("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
-      );
-      let sellersCount = await contract.sellersCount();
-      console.log("Sellers count:", sellersCount);
-
-      // Create array to store seller info
-      const sellers = [];
-
-      // Loop through each seller index to get the address first
-      for (let i = 0; i < sellersCount; i++) {
-        // Get seller address from the sellers array using the auto-generated getter
-        const address = await contract.sellers(i);
-
-        // Get seller details, verification status, and rejection status
-        const [sellerDetails, isVerified, isRejected] = await Promise.all([
-          contract.SellerMapping(address),
-          contract.SellerVerification(address),
-          contract.SellerRejection(address),
-        ]);
-
-        // Format seller data
-        sellers.push({
-          id: i + 1,
-          address: address,
-          name: sellerDetails.name,
-          age: sellerDetails.age.toNumber(),
-          aadharNumber: sellerDetails.aadharNumber,
-          panNumber: sellerDetails.panNumber,
-          ownedLands: sellerDetails.landsOwned,
-          document: sellerDetails.document,
-          isVerified: isVerified,
-          isRejected: isRejected,
-        });
-      }
-
-      setSellersList(sellers);
-    } catch (error) {
-      console.error("Error loading seller data:", error);
-      alert("Failed to load seller information");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Verify a seller
   const verifySeller = async (address) => {
@@ -182,7 +127,7 @@ const SellerInfo = () => {
   };
 
   // Loading state
-  if (loading) {
+  if (walletLoading || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -374,12 +319,7 @@ const SellerInfo = () => {
                 >
                   Pan Number
                 </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Owned Lands
-                </th>
+
                 <th
                   scope="col"
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
@@ -433,9 +373,7 @@ const SellerInfo = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {seller.panNumber}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {seller.ownedLands.toString()}
-                    </td>
+
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600">
                       <a
                         href={seller.document}

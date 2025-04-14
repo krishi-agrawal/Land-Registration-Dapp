@@ -1,139 +1,123 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ethers } from "ethers";
-import Registry from "../../artifacts/contracts/Registry.sol/Registry.json";
+import { useWallet } from "../contexts/WalletContext";
 
 const Dashboard = () => {
   const navigate = useNavigate();
 
   // States
-  const [provider, setProvider] = useState(null);
-  const [signer, setSigner] = useState(null);
-  const [account, setAccount] = useState(null);
-  const [contract, setContract] = useState(null);
-  const [registered, setRegistered] = useState(false);
-  const [verified, setVerified] = useState(false);
+  const {
+    account,
+    contract,
+    isVerified: verified,
+    isRejected: rejected,
+    loading,
+  } = useWallet();
   const [count, setCount] = useState(0);
   const [sellersCount, setSellersCount] = useState(0);
   const [requestsCount, setRequestsCount] = useState(0);
   const [landData, setLandData] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoadingLands, setIsLoadingLands] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const landsPerPage = 6;
 
-  // Using your provided MetaMask auth code
   useEffect(() => {
-    if (window.ethereum) {
-      const ethersProvider = new ethers.providers.Web3Provider(window.ethereum);
-      setProvider(ethersProvider);
-      connectWallet(ethersProvider); // Pass provider directly here
+    const loadContractData = async (contractInstance, currentAccount) => {
+      try {
+        if (!contractInstance) {
+          console.error("Contract instance is null or undefined");
+          return;
+        }
+
+        // Get counts in parallel
+        const [landsCount, sellerCount, reqCount] = await Promise.all([
+          contractInstance.getLandsCount(),
+          contractInstance.getSellersCount(),
+          contractInstance.getRequestsCount(),
+        ]);
+
+        setCount(parseInt(landsCount.toString()));
+        setSellersCount(parseInt(sellerCount.toString()));
+        setRequestsCount(parseInt(reqCount.toString()));
+
+        // Load land data
+        await loadLandData(contractInstance, parseInt(landsCount.toString()));
+      } catch (error) {
+        console.error("Error loading contract data:", error);
+      }
+    };
+
+    if (contract) {
+      loadContractData(contract, account);
     } else {
-      alert("Please install MetaMask!");
+      console.log("Contract not initialized yet");
     }
-  }, []);
-
-  const connectWallet = async (ethersProvider) => {
-    try {
-      const accounts = await ethersProvider.send("eth_requestAccounts", []);
-      const ethersSigner = ethersProvider.getSigner();
-      setSigner(ethersSigner);
-      setAccount(accounts[0]);
-
-      const contractInstance = new ethers.Contract(
-        "0x273d42dE3e74907cD70739f58DC717dF2872F736", // Using the contract address from your code
-        Registry.abi,
-        ethersSigner
-      );
-      setContract(contractInstance);
-
-      // Continue with loading contract data after connecting wallet
-      loadContractData(contractInstance, accounts[0]);
-    } catch (error) {
-      console.error("Error connecting wallet:", error);
-      setLoading(false);
-    }
-  };
-
-  // For refreshing page only once (keeping original functionality)
-  useEffect(() => {
-    if (!localStorage.getItem("pageLoaded")) {
-      localStorage.setItem("pageLoaded", "true");
-      window.location.reload();
-    }
-  }, []);
-
-  const loadContractData = async (contractInstance, currentAccount) => {
-    try {
-      // Check if user is registered and verified
-      const isRegistered = await contractInstance.isBuyer(currentAccount);
-      setRegistered(isRegistered);
-
-      const isVerified = await contractInstance.isVerified(currentAccount);
-      setVerified(isVerified);
-
-      // Get counts
-      const landsCount = await contractInstance.getLandsCount();
-      setCount(parseInt(landsCount.toString()));
-
-      const sellerCount = await contractInstance.getSellersCount();
-      setSellersCount(parseInt(sellerCount.toString()));
-
-      const reqCount = await contractInstance.getRequestsCount();
-      setRequestsCount(parseInt(reqCount.toString()));
-
-      // Load land data
-      await loadLandData(contractInstance, parseInt(landsCount.toString()));
-
-      setLoading(false);
-    } catch (error) {
-      console.error("Error loading contract data:", error);
-      setLoading(false);
-    }
-  };
+  }, [contract, account]);
 
   const getLandDetails = async (contract, id, isRequested, idx) => {
-    const land = await contract.lands(id);
-    const owner = await contract.getLandOwner(id);
-    const image = await contract.getImage(id);
-    const document = await contract.getDocument(id);
+    try {
+      // Run all queries in parallel rather than sequentially
+      const [land, owner, image, document] = await Promise.all([
+        contract.lands(id),
+        contract.getLandOwner(id),
+        contract.getImage(id),
+        contract.getDocument(id),
+      ]);
 
-    return {
-      id: idx,
-      originalId: id,
-      area: land.area.toString(),
-      city: land.city,
-      state: land.state,
-      price: land.landPrice.toString(),
-      pid: land.propertyPID.toString(),
-      surveyNumber: land.physicalSurveyNumber.toString(),
-      owner,
-      isRequested,
-      image,
-      document,
-    };
+      return {
+        id: idx,
+        originalId: id,
+        area: land.area.toString(),
+        city: land.city,
+        state: land.state,
+        price: land.landPrice.toString(),
+        pid: land.propertyPID.toString(),
+        surveyNumber: land.physicalSurveyNumber.toString(),
+        owner,
+        isRequested,
+        image,
+        document,
+      };
+    } catch (error) {
+      console.error(`Error fetching details for land ID ${id}:`, error);
+      return null;
+    }
   };
 
   const loadLandData = async (contractInstance, count) => {
+    setIsLoadingLands(true);
     try {
-      const lands = [];
+      // Pre-check for requested lands in a single batch
+      const requestStatusPromises = [];
+      for (let i = 1; i <= count; i++) {
+        requestStatusPromises.push(contractInstance.isRequested(i));
+      }
+      const requestStatuses = await Promise.all(requestStatusPromises);
+
+      // Gather all land detail promises for non-requested lands
+      const landPromises = [];
       let idx = 0;
 
-      // Get land details
       for (let i = 1; i <= count; i++) {
-        const isRequested = await contractInstance.isRequested(i);
-        if (!isRequested) {
+        if (!requestStatuses[i - 1]) {
+          // If not requested
           idx++;
-          const landDetails = await getLandDetails(
-            contractInstance,
-            i,
-            isRequested,
-            idx
-          );
-          lands.push(landDetails);
+          landPromises.push(getLandDetails(contractInstance, i, false, idx));
         }
       }
+
+      // Execute all promises in parallel
+      const landsWithNulls = await Promise.all(landPromises);
+
+      // Filter out any nulls from failed requests
+      const lands = landsWithNulls.filter((land) => land !== null);
 
       setLandData(lands);
     } catch (error) {
       console.error("Error loading land data:", error);
+    } finally {
+      setIsLoadingLands(false);
     }
   };
 
@@ -181,6 +165,11 @@ const Dashboard = () => {
       </div>
     );
   }
+
+  // Calculate current lands to display for pagination
+  const indexOfLastLand = currentPage * landsPerPage;
+  const indexOfFirstLand = indexOfLastLand - landsPerPage;
+  const currentLands = landData.slice(indexOfFirstLand, indexOfLastLand);
 
   const renderLandCard = (land) => (
     <div key={land.id} className="w-full md:w-1/2 lg:w-1/3 p-4">
@@ -523,10 +512,51 @@ const Dashboard = () => {
         </div>
 
         <div className="p-5">
-          {landData.length > 0 ? (
-            <div className="flex flex-wrap -mx-4">
-              {landData.map(renderLandCard)}
+          {isLoadingLands ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading available lands...</p>
             </div>
+          ) : landData.length > 0 ? (
+            <>
+              <div className="flex flex-wrap -mx-4">
+                {currentLands.map(renderLandCard)}
+              </div>
+
+              {/* Pagination Controls */}
+              {landData.length > landsPerPage && (
+                <div className="flex justify-center mt-8">
+                  <button
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(prev - 1, 1))
+                    }
+                    disabled={currentPage === 1}
+                    className="px-4 py-2 mx-1 bg-gray-200 rounded disabled:opacity-50 hover:bg-gray-300 transition-colors"
+                  >
+                    Previous
+                  </button>
+                  <span className="px-4 py-2 mx-1">
+                    Page {currentPage} of{" "}
+                    {Math.ceil(landData.length / landsPerPage)}
+                  </span>
+                  <button
+                    onClick={() =>
+                      setCurrentPage((prev) =>
+                        prev < Math.ceil(landData.length / landsPerPage)
+                          ? prev + 1
+                          : prev
+                      )
+                    }
+                    disabled={
+                      currentPage >= Math.ceil(landData.length / landsPerPage)
+                    }
+                    className="px-4 py-2 mx-1 bg-gray-200 rounded disabled:opacity-50 hover:bg-gray-300 transition-colors"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </>
           ) : (
             <div className="text-center py-12">
               <svg

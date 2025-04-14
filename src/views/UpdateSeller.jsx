@@ -1,93 +1,50 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { ethers } from "ethers";
-import Land from "../../artifacts/contracts/Registry.sol/Registry.json";
+import { Link, useNavigate } from "react-router-dom";
+import { useWallet } from "../contexts/WalletContext";
 
 const UpdateSeller = () => {
   // States
-  const [provider, setProvider] = useState(null);
-  const [signer, setSigner] = useState(null);
-  const [account, setAccount] = useState(null);
-  const [contract, setContract] = useState(null);
-  const [address, setAddress] = useState("");
+  const {
+    account,
+    contract,
+    isSeller: registered,
+    isVerified: verified,
+    isRejected: rejected,
+    loading: walletLoading,
+  } = useWallet();
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
   const [aadharNumber, setAadharNumber] = useState("");
   const [panNumber, setPanNumber] = useState("");
-  const [verified, setVerified] = useState(false);
-  const [rejected, setRejected] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
 
   // MetaMask connection
   useEffect(() => {
-    if (window.ethereum) {
-      const ethersProvider = new ethers.providers.Web3Provider(window.ethereum);
-      setProvider(ethersProvider);
-      connectWallet(ethersProvider);
-    } else {
-      alert("Please install MetaMask!");
-    }
-  }, []);
+    const loadSellerData = async (contractInstance, currentAddress) => {
+      try {
+        // Get seller details
+        const sellerDetails = await contractInstance.getSellerDetails(
+          currentAddress
+        );
+        console.log("Seller details:", sellerDetails);
 
-  const connectWallet = async (ethersProvider) => {
-    try {
-      const accounts = await ethersProvider.send("eth_requestAccounts", []);
-      const ethersSigner = ethersProvider.getSigner();
-      setSigner(ethersSigner);
-      setAccount(accounts[0]);
-      setAddress(accounts[0]);
+        // Update state with seller details
+        setName(sellerDetails[0]);
+        setAge(sellerDetails[1]);
+        setAadharNumber(sellerDetails[2]);
+        setPanNumber(sellerDetails[3]);
 
-      const contractInstance = new ethers.Contract(
-        "0x273d42dE3e74907cD70739f58DC717dF2872F736",
-        Land.abi,
-        ethersSigner
-      );
-      setContract(contractInstance);
-
-      await loadSellerData(contractInstance, accounts[0]);
-    } catch (error) {
-      console.error("Error connecting wallet:", error);
-      setLoading(false);
-    }
-  };
-
-  // For refreshing page only once
-  useEffect(() => {
-    if (!localStorage.getItem("pageLoaded")) {
-      localStorage.setItem("pageLoaded", "true");
-      window.location.reload();
-    }
-  }, []);
-
-  const loadSellerData = async (contractInstance, currentAddress) => {
-    try {
-      // Check verification status
-      const isVerified = await contractInstance.isVerified(currentAddress);
-      setVerified(isVerified);
-
-      const isRejected = await contractInstance.isRejected(currentAddress);
-      setRejected(isRejected);
-
-      // Get seller details
-      const sellerDetails = await contractInstance.getSellerDetails(
-        currentAddress
-      );
-      console.log("Seller details:", sellerDetails);
-
-      // Update state with seller details
-      setName(sellerDetails[0]);
-      setAge(sellerDetails[1]);
-      setAadharNumber(sellerDetails[2]);
-      setPanNumber(sellerDetails[3]);
-
-      setLoading(false);
-    } catch (error) {
-      console.error("Error loading seller data:", error);
-      setLoading(false);
-    }
-  };
+        setLoading(false);
+      } catch (error) {
+        console.error("Error loading seller data:", error);
+        setLoading(false);
+      }
+    };
+    if (contract && account) loadSellerData(contract, account);
+  }, [contract, account]);
 
   const updateSeller = async () => {
     if (name === "" || age === "" || aadharNumber === "" || panNumber === "") {
@@ -145,7 +102,7 @@ const UpdateSeller = () => {
   };
 
   // Loading state
-  if (loading) {
+  if (walletLoading || loading) {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
@@ -173,7 +130,7 @@ const UpdateSeller = () => {
                 <input
                   disabled
                   type="text"
-                  value={address}
+                  value={account}
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-100"
                 />
               </div>

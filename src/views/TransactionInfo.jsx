@@ -1,89 +1,45 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { useNavigate } from "react-router-dom";
-import Land from "../../artifacts/contracts/Registry.sol/Registry.json";
+import { useWallet } from "../contexts/WalletContext";
 
 const TransactionInfo = () => {
-  const [landContract, setLandContract] = useState(null);
-  const [account, setAccount] = useState(null);
-  const [provider, setProvider] = useState(null);
-  const [signer, setSigner] = useState(null);
-  const [isVerified, setIsVerified] = useState(false);
+  const navigate = useNavigate();
+  const {
+    account,
+    contract: landContract,
+    isLandInspector: isVerified,
+    loading: walletLoading,
+  } = useWallet();
+
   const [lands, setLands] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [transferStatus, setTransferStatus] = useState({}); // Track transfer status per land
-
-  const navigate = useNavigate();
+  const [transferStatus, setTransferStatus] = useState({});
 
   useEffect(() => {
-    const initialize = async () => {
+    const fetchLandData = async (contract) => {
       try {
-        // For refreshing page only once
-        if (!localStorage.getItem("pageLoaded")) {
-          localStorage.setItem("pageLoaded", "true");
-          window.location.reload();
-        }
+        // Get total lands count
+        const count = await contract.getLandsCount();
+        const landsCount = parseInt(count.toString());
 
-        // Initialize provider and connect wallet
-        if (window.ethereum) {
-          const ethersProvider = new ethers.providers.Web3Provider(
-            window.ethereum
-          );
-          setProvider(ethersProvider);
-          await connectWallet(ethersProvider);
-        } else {
-          alert("Please install MetaMask!");
-        }
-      } catch (error) {
-        console.error("Initialization error:", error);
-        alert("Failed to initialize. Check console for details.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
+        // Create array of land IDs (1 to landsCount)
+        const landIds = Array.from({ length: landsCount }, (_, i) => i + 1);
 
-    initialize();
-  }, []);
+        // Step 1: Check all isRequested statuses in parallel
+        const isRequestedPromises = landIds.map((id) =>
+          contract.isRequested(id)
+        );
+        const isRequestedResults = await Promise.all(isRequestedPromises);
 
-  const connectWallet = async (provider) => {
-    try {
-      const accounts = await provider.send("eth_requestAccounts", []);
-      const ethersSigner = provider.getSigner();
-      setSigner(ethersSigner);
-      setAccount(accounts[0]);
+        // Step 2: Filter only IDs that are requested
+        const requestedLandIds = landIds.filter(
+          (_, index) => isRequestedResults[index]
+        );
 
-      const contractInstance = new ethers.Contract(
-        "0x273d42dE3e74907cD70739f58DC717dF2872F736", // Contract address
-        Land.abi,
-        ethersSigner
-      );
-      console.log(contractInstance);
-      setLandContract(contractInstance);
-
-      // Check if current user is verified as land inspector
-      const verificationStatus = await contractInstance.isLandInspector(
-        accounts[0]
-      );
-      setIsVerified(verificationStatus);
-
-      // Get lands data
-      await fetchLandData(contractInstance);
-    } catch (error) {
-      console.error("Error connecting wallet:", error);
-      throw error;
-    }
-  };
-
-  const fetchLandData = async (contract) => {
-    try {
-      const count = await contract.getLandsCount();
-      const landsCount = parseInt(count.toString());
-
-      const landsList = [];
-      const filteredLands = [];
-      for (let i = 1; i <= landsCount; i++) {
-        const isRequested = await contract.isRequested(i);
-        if (isRequested) {
+        // Step 3: For filtered IDs, fetch all details in parallel
+        const landDetailsPromises = requestedLandIds.map(async (landId) => {
+          // Use Promise.all to fetch all details for a single land in parallel
           const [
             owner,
             area,
@@ -95,21 +51,21 @@ const TransactionInfo = () => {
             request,
             isPaid,
           ] = await Promise.all([
-            contract.getLandOwner(i),
-            contract.getArea(i),
-            contract.getCity(i),
-            contract.getState(i),
-            contract.getPrice(i),
-            contract.getPID(i),
-            contract.getSurveyNumber(i),
-            contract.getRequestDetails(i),
-            contract.isPaid(i),
+            contract.getLandOwner(landId),
+            contract.getArea(landId),
+            contract.getCity(landId),
+            contract.getState(landId),
+            contract.getPrice(landId),
+            contract.getPID(landId),
+            contract.getSurveyNumber(landId),
+            contract.getRequestDetails(landId),
+            contract.isPaid(landId),
           ]);
 
           const transferCompleted = request[1] === owner;
 
-          landsList.push({
-            originalId: i, // Keep original ID for reference
+          return {
+            originalId: landId,
             owner,
             area: area.toString(),
             city,
@@ -120,26 +76,33 @@ const TransactionInfo = () => {
             request,
             isPaid,
             transferCompleted,
-          });
-        }
+          };
+        });
+
+        // Wait for all land details to be fetched
+        const landsList = await Promise.all(landDetailsPromises);
+
+        // Add sequential IDs
+        const landsWithSequentialIds = landsList.map((land, index) => ({
+          ...land,
+          id: index + 1,
+        }));
+
+        setLands(landsWithSequentialIds);
+      } catch (error) {
+        console.error("Error fetching land data:", error);
+      } finally {
+        setIsLoading(false);
       }
+    };
 
-      // Update IDs to be sequential starting from 1
-      const landsWithSequentialIds = landsList.map((land, index) => ({
-        ...land,
-        id: index + 1, // New sequential ID
-      }));
-
-      console.log(landsWithSequentialIds);
-      setLands(landsWithSequentialIds);
-    } catch (error) {
-      console.error("Error fetching land data:", error);
-      throw error;
+    if (landContract) {
+      fetchLandData(landContract);
     }
-  };
+  }, [landContract]);
+
   const landTransfer = async (landId, newOwner) => {
     try {
-      // Disable the button immediately
       setTransferStatus((prev) => ({ ...prev, [landId]: false }));
 
       const tx = await landContract.LandOwnershipTransfer(landId, newOwner, {
@@ -149,7 +112,8 @@ const TransactionInfo = () => {
 
       await tx.wait();
 
-      // Update the state to reflect the completed transfer
+      await landContract.getRequestDetails(landId); // optional re-fetch
+
       setLands((prevLands) =>
         prevLands.map((land) =>
           land.id === landId
@@ -158,34 +122,19 @@ const TransactionInfo = () => {
         )
       );
 
-      // Optionally refresh data from blockchain
-      await fetchLandData(landContract);
+      window.location.reload();
     } catch (error) {
       console.error("Transfer error:", error);
-      // Re-enable the button if transfer failed
       setTransferStatus((prev) => ({ ...prev, [landId]: true }));
       alert("Land transfer verification failed. See console for details.");
     }
   };
 
-  // UI Rendering
-  if (isLoading) {
+  if (isLoading || walletLoading) {
     return (
       <div className="p-8">
         <div className="bg-white rounded-lg shadow-lg p-6">
           <h1 className="text-2xl font-bold text-blue-600">Loading...</h1>
-        </div>
-      </div>
-    );
-  }
-
-  if (!landContract) {
-    return (
-      <div className="p-8">
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <h1 className="text-2xl font-bold text-blue-600">
-            Connecting to contract...
-          </h1>
         </div>
       </div>
     );
@@ -214,121 +163,99 @@ const TransactionInfo = () => {
           <p className="text-blue-100">Transfer ownership verification panel</p>
         </div>
 
-        <div className="p-4">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead>
-                <tr className="bg-gray-50">
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    #
+        <div className="p-4 overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                {[
+                  "#",
+                  "Owner",
+                  "Buyer",
+                  "Seller",
+                  "Area",
+                  "City",
+                  "State",
+                  "Price (ETH)",
+                  "PID",
+                  "Survey #",
+                  "Actions",
+                ].map((head) => (
+                  <th
+                    key={head}
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    {head}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Owner
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Buyer
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Seller
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Area
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    City
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    State
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Price (ETH)
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    PID
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Survey #
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {lands.map((land) => {
-                  // Determine if button should be disabled
-                  const hasPendingRequest = land.request[3]; // Assuming request[3] indicates pending status
-                  const isDisabled = !land.isPaid || land.transferCompleted;
+                ))}
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {lands.map((land) => {
+                const isDisabled = !land.isPaid || land.transferCompleted;
 
-                  return (
-                    <tr
-                      key={land.id}
-                      className="hover:bg-blue-50 transition-colors"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {land.id}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-mono">
-                        {`${land.owner.substring(
-                          0,
-                          6
-                        )}...${land.owner.substring(38)}`}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-mono">
-                        {`${land.request[1].substring(
-                          0,
-                          6
-                        )}...${land.request[1].substring(38)}`}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-mono">
-                        {`${land.request[0].substring(
-                          0,
-                          6
-                        )}...${land.request[0].substring(38)}`}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {land.area}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {land.city}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {land.state}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {land.price}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {land.pid}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {land.surveyNumber}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() =>
-                              landTransfer(land.id, land.request[1])
-                            }
-                            disabled={isDisabled}
-                            className={`px-4 py-2 rounded-md text-white shadow-sm transition-all ${
-                              isDisabled
-                                ? "bg-gray-400 cursor-not-allowed opacity-60"
-                                : "bg-blue-600 hover:bg-blue-700 hover:shadow-md"
-                            }`}
-                          >
-                            {land.transferCompleted
-                              ? "Verified"
-                              : "Verify Transfer"}
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                return (
+                  <tr
+                    key={land.id}
+                    className="hover:bg-blue-50 transition-colors"
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {land.id}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-mono">
+                      {`${land.owner.slice(0, 6)}...${land.owner.slice(-4)}`}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-mono">
+                      {`${land.request[1].slice(
+                        0,
+                        6
+                      )}...${land.request[1].slice(-4)}`}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-mono">
+                      {`${land.request[0].slice(
+                        0,
+                        6
+                      )}...${land.request[0].slice(-4)}`}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {land.area}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {land.city}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {land.state}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {land.price}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {land.pid}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {land.surveyNumber}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <button
+                        onClick={() =>
+                          landTransfer(land.originalId, land.request[1])
+                        }
+                        disabled={isDisabled}
+                        className={`px-4 py-2 rounded-md text-white shadow-sm transition-all ${
+                          isDisabled
+                            ? "bg-gray-400 cursor-not-allowed opacity-60"
+                            : "bg-blue-600 hover:bg-blue-700 hover:shadow-md"
+                        }`}
+                      >
+                        {land.transferCompleted
+                          ? "Verified"
+                          : "Verify Transfer"}
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
