@@ -79,9 +79,9 @@ const OwnedLands = () => {
   // UI Rendering
   if (isLoading) {
     return (
-      <div className="p-8">
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <h1 className="text-2xl font-bold text-blue-600">Loading...</h1>
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
         </div>
       </div>
     );
