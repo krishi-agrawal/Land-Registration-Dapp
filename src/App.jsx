@@ -18,6 +18,7 @@ import BuyerInfo from "./views/BuyerInfo.jsx";
 import LIDashboard from "./views/LIDashboard.jsx";
 import OwnedLands from "./views/OwnedLands.jsx";
 import MakePayment from "./views/MakePayment.jsx";
+import HelpPage from "./views/NeedHelp.jsx";
 import TransactionInfo from "./views/TransactionInfo.jsx";
 
 import { WalletProvider } from "./contexts/WalletContext.jsx";
@@ -30,6 +31,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Login />} />
+          <Route path="Help" element={<HelpPage/>}/>
           <Route path="/Vanta" element={<VantaGlobe />} />
           <Route path="/registerbuyer" element={<RegisterBuyer />} />
           <Route path="/registerseller" element={<RegisterSeller />} />

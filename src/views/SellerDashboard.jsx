@@ -64,6 +64,12 @@ const SDash = () => {
     }
   }, [contract, account]);
 
+  const handleLogout = () => {
+    // Add any logout logic here if needed (e.g., clearing local storage)
+    // Then navigate to login page
+    navigate('/');
+  };
+
   const loadLandDetails = async (contract, account, count) => {
     setIsLoadingLands(true);
     try {
@@ -141,12 +147,34 @@ const SDash = () => {
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-8 flex justify-between items-center">
+        <div>
           <h1 className="text-3xl font-bold text-gray-800">Seller Dashboard</h1>
           <p className="text-gray-600 mt-1">
-            Manage your properties and land listings
+            Manage your land properties and Listings
           </p>
         </div>
+        <button
+          onClick={handleLogout}
+          className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-sm transition-colors flex items-center"
+        >
+          <svg
+            className="h-5 w-5 mr-2"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+            />
+          </svg>
+          Logout
+        </button>
+      </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
