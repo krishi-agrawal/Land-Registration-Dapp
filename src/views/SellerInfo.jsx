@@ -108,7 +108,7 @@ const SellerInfo = () => {
       setProcessingTx(true);
       const tx = await landContract.rejectSeller(address, {
         from: account,
-        gasLimit: 2100000,
+        gasLimit: 210000,
       });
       alert("Rejection transaction submitted. Please wait for confirmation...");
 

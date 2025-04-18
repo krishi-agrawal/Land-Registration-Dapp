@@ -72,11 +72,11 @@ const ApproveRequest = () => {
       console.log(`Approving request #${reqId}`);
 
       const tx = await contract.approveRequest(reqId, {
-        gasLimit: 2100000,
+        gasLimit: 210000,
       });
 
       console.log("Transaction sent:", tx.hash);
-      alert("Transaction submitted. Please wait for confirmation...");
+      // alert("Transaction submitted. Please wait for confirmation...");
 
       await tx.wait();
       console.log("Transaction confirmed");
@@ -94,7 +94,9 @@ const ApproveRequest = () => {
   if (walletLoading || loading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        </div>
       </div>
     );
   }
@@ -128,19 +130,18 @@ const ApproveRequest = () => {
 
         {/* Processing overlay */}
         {processingTx && (
-          <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white p-8 rounded-xl shadow-2xl text-center max-w-md">
-              <div className="animate-spin rounded-full h-14 w-14 border-t-3 border-b-3 border-blue-500 mx-auto"></div>
-              <p className="mt-5 text-xl font-medium text-gray-800">
-                Processing Transaction
-              </p>
-              <p className="mt-2 text-gray-600">
-                Please wait while the blockchain confirms your action. This may
-                take a moment.
-              </p>
-            </div>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+            <p className="mt-4 text-lg font-medium text-gray-700">
+              Processing transaction...
+            </p>
+            <p className="text-sm text-gray-500">
+              Please wait while the blockchain confirms your action.
+            </p>
           </div>
-        )}
+        </div>
+      )}
 
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
           <div className="p-6 bg-gradient-to-r from-blue-500 to-blue-600 text-white">
@@ -312,11 +313,10 @@ const ApproveRequest = () => {
                           <button
                             onClick={() => approveRequest(request.originalId)}
                             disabled={request.approved}
-                            className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                              request.approved
+                            className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${request.approved
                                 ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                                 : "bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-sm hover:shadow"
-                            }`}
+                              }`}
                           >
                             {request.approved ? (
                               <>

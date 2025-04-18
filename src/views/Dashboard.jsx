@@ -130,7 +130,7 @@ const Dashboard = () => {
       });
 
       const tx = await contract.requestLand(sellerAddress, landId, {
-        gasLimit: 300000,
+        gasLimit: 2100000,
       });
 
       console.log("Transaction submitted:", tx.hash);

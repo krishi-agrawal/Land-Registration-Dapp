@@ -48,7 +48,7 @@ const RegisterSeller = () => {
         setAccount(accounts[0]);
 
         const contractInstance = new ethers.Contract(
-          "0x273d42dE3e74907cD70739f58DC717dF2872F736", // Replace with your contract address
+          "0x20c436af289adc0dbbf05c79caa11612ed20ef27", // Replace with your contract address
           Registry.abi,
           ethersSigner
         );
@@ -117,7 +117,7 @@ const RegisterSeller = () => {
     //   setError("Aadhar Number should be 12 digits long!");
     //   setLoading(false);
     //   return;
-    // }
+    // } 0x20c436af289adc0dbbf05c79caa11612ed20ef27
 
     // if (panNumber.length !== 10) {
     //   setError("Pan Number should be a 10-digit unique number!");
@@ -150,7 +150,7 @@ const RegisterSeller = () => {
         aadharNumber,
         panNumber,
         parseInt(landsOwned),
-        documentHash,  { gasLimit: 500000 } 
+        documentHash,  { gasLimit: 210000} 
       );
 
       await tx.wait();

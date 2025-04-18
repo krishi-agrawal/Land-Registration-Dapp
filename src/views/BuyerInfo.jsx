@@ -71,7 +71,7 @@ const BuyerInfo = () => {
       console.log("Land contract in Verify Buyer: ", landContract);
       const tx = await landContract.verifyBuyer(address, {
         from: account,
-        gasLimit: 2100000,
+        gasLimit: 210000,
       });
       alert(
         "Verification transaction submitted. Please wait for confirmation..."
@@ -97,7 +97,7 @@ const BuyerInfo = () => {
       setProcessingTx(true);
       const tx = await landContract.rejectBuyer(address, {
         from: account,
-        gasLimit: 2100000,
+        gasLimit: 210000,
       });
       alert("Rejection transaction submitted. Please wait for confirmation...");
 

@@ -48,7 +48,7 @@ const RegisterBuyer = () => {
         setAccount(accounts[0]);
 
         const contractInstance = new ethers.Contract(
-          "0x273d42dE3e74907cD70739f58DC717dF2872F736",
+          "0x20c436af289adc0dbbf05c79caa11612ed20ef27",
           Registry.abi,
           ethersSigner
         );
@@ -172,7 +172,7 @@ const RegisterBuyer = () => {
         documentHash,
         email,
         {
-          gasLimit: 1000000,
+          gasLimit: 2100000,
         }
       );
 

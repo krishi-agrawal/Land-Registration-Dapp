@@ -103,7 +103,7 @@ const Login = () => {
       setSigner(ethersSigner);
       
       const contractInstance = new ethers.Contract(
-        "0x273d42dE3e74907cD70739f58DC717dF2872F736",
+        "0x20c436af289adc0dbbf05c79caa11612ed20ef27",
         Registry.abi,
         ethersSigner
       );
@@ -261,7 +261,7 @@ const Login = () => {
           <div className="relative">
             <select
               id="role"
-              className="w-full p-3 bg-white/10 border border-white/20 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all appearance-none"
+              className="w-full p-3 bg-black border border-white/20 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all appearance-none"
               onChange={handleInputChange}
               defaultValue=""
             >

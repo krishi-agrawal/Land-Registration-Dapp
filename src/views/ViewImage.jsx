@@ -23,7 +23,7 @@ const ViewImage = () => {
   const navigate = useNavigate();
 
   // Contract address should be in config
-  const contractAddress = "0x273d42dE3e74907cD70739f58DC717dF2872F736";
+  const contractAddress = "0x20c436af289adc0dbbf05c79caa11612ed20ef27";
 
   // Get land details helper function
   const getLandDetails = async (contract, id) => {

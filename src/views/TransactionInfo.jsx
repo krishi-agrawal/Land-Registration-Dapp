@@ -107,7 +107,7 @@ const TransactionInfo = () => {
 
       const tx = await landContract.LandOwnershipTransfer(landId, newOwner, {
         from: account,
-        gasLimit: 2100000,
+        gasLimit: 210000,
       });
 
       await tx.wait();
