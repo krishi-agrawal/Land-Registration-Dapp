@@ -158,9 +158,20 @@ const TransactionInfo = () => {
   return (
     <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 min-h-screen">
       <div className="bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
-        <div className="p-5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+        <div className="p-5 flex  justify-between bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+          <div>
           <h2 className="text-2xl font-bold">Lands Information</h2>
           <p className="text-blue-100">Transfer ownership verification panel</p>
+          </div>
+          <button
+                onClick={() => navigate('/LIDashboard')}
+                className="flex items-center text-white bg-white/10 hover:bg-white/20 rounded-lg px-4 py-2 transition-colors mr-4"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+                </svg>
+                Return to Dashboard
+          </button>
         </div>
 
         <div className="p-4 overflow-x-auto">

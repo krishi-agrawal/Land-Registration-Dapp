@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ethers } from "ethers";
 import { useWallet } from "../contexts/WalletContext";
+import { useNavigate } from "react-router-dom";
 
 const BuyerProfile = () => {
+  const navigate = useNavigate();
   // States
   const {
     account,
@@ -277,37 +279,61 @@ const BuyerProfile = () => {
                 </div>
               </div>
 
-              <div className="mt-8 border-t border-gray-100 pt-6">
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (verified) {
-                      window.location.href = "/buyerdashboard/updateBuyer";
-                    }
-                  }}
-                  className={`inline-flex items-center px-4 py-2 rounded-lg font-medium ${
-                    verified
-                      ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-sm hover:shadow transition-all"
-                      : "bg-gray-200 text-gray-400 cursor-not-allowed"
-                  }`}
+              <div className="mt-8 border-t border-gray-100 pt-6 flex justify-between">
+              {/* Return to Dashboard Button (Left) */}
+              <button
+                type="button"
+                onClick={() => navigate('/buyerdashboard')}
+                className="inline-flex items-center px-4 py-2 rounded-lg font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all"
+              >
+                <svg
+                  className="h-5 w-5 mr-2"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
                 >
-                  <svg
-                    className="h-5 w-5 mr-2"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                    />
-                  </svg>
-                  Edit Profile
-                </button>
-              </div>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                  />
+                </svg>
+                Return to Dashboard
+              </button>
+              
+              {/* Edit Profile Button (Right) */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (verified) {
+                    window.location.href = "/buyerdashboard/updateBuyer";
+                  }
+                }}
+                className={`inline-flex items-center px-4 py-2 rounded-lg font-medium ${
+                  verified
+                    ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-sm hover:shadow transition-all"
+                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                }`}
+              >
+                <svg
+                  className="h-5 w-5 mr-2"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                  />
+                </svg>
+                Edit Profile
+              </button>
+            </div>
             </form>
           </div>
         </div>

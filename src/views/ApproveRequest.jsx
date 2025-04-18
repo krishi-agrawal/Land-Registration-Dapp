@@ -144,7 +144,8 @@ const ApproveRequest = () => {
       )}
 
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
-          <div className="p-6 bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+        <div className="p-6 bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+          <div className="flex justify-between items-center">
             <div className="flex items-center">
               <div className="bg-white/20 p-3 rounded-lg mr-4">
                 <svg
@@ -169,7 +170,29 @@ const ApproveRequest = () => {
                 </p>
               </div>
             </div>
-          </div>
+
+            <button
+              onClick={() => navigate("/sellerDashboard")}
+              className="flex items-center text-white bg-white/10 hover:bg-white/20 rounded-lg px-4 py-2.5 transition-colors"
+            >
+              <svg
+                className="h-5 w-5 mr-2"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M11 17l-5-5m0 0l5-5m-5 5h12"
+                />
+              </svg>
+              Return to Dashboard
+            </button>
+        </div>
+      </div>
 
           <div className="p-6">
             <div className="overflow-x-auto">
@@ -363,29 +386,6 @@ const ApproveRequest = () => {
                 </tbody>
               </table>
             </div>
-          </div>
-
-          <div className="p-6 border-t border-gray-100">
-            <button
-              onClick={() => navigate("/sellerDashboard")}
-              className="flex items-center justify-center mx-auto px-6 py-2.5 rounded-lg font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
-            >
-              <svg
-                className="h-5 w-5 mr-2"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M11 17l-5-5m0 0l5-5m-5 5h12"
-                />
-              </svg>
-              Return to Dashboard
-            </button>
           </div>
         </div>
       </div>

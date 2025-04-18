@@ -284,7 +284,7 @@ const SDash = () => {
             </div>
             <div className="p-5">
               <p className="text-gray-600 mb-4">
-                Register a new land property.
+                Register a new land property on blockchain.
               </p>
               <button
                 onClick={() => navigate("/sellerdashboard/addland")}
