@@ -17,7 +17,7 @@ export const WalletProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const contractAddress = "0x20c436af289adc0dbbf05c79caa11612ed20ef27";
+  const contractAddress = "0x7906632B036f9D1E63FFdcb4EB1317880D06D799";
 
   // Initialize provider on mount
   useEffect(() => {

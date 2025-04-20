@@ -20,7 +20,7 @@ import OwnedLands from "./views/OwnedLands.jsx";
 import MakePayment from "./views/MakePayment.jsx";
 import HelpPage from "./views/NeedHelp.jsx";
 import TransactionInfo from "./views/TransactionInfo.jsx";
-
+import ViewLandMap from "./components/ViewLandMap.jsx";
 import { WalletProvider } from "./contexts/WalletContext.jsx";
 
 function App() {
@@ -31,7 +31,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Login />} />
-          <Route path="Help" element={<HelpPage/>}/>
+          <Route path="Help" element={<HelpPage />} />
           <Route path="/Vanta" element={<VantaGlobe />} />
           <Route path="/registerbuyer" element={<RegisterBuyer />} />
           <Route path="/registerseller" element={<RegisterSeller />} />
@@ -41,6 +41,7 @@ function App() {
             <Route index element={<SellerDashboard />} />
             <Route path="addLand" element={<AddLand />} />
             <Route path="viewImage" element={<ViewImage />} />
+            <Route path="viewImage/:landId/map" element={<ViewLandMap />} />
             <Route path="sellerprofile" element={<SellerProfile />} />
             <Route path="approveRequest" element={<ApproveRequest />} />
             <Route path="updateseller" element={<UpdateSeller />} />
@@ -49,6 +50,7 @@ function App() {
           {/* Buyer Routes */}
           <Route path="/buyerdashboard">
             <Route index element={<BuyerDashboard />} />
+            <Route path=":landId/map" element={<ViewLandMap />} />
             <Route path="updatebuyer" element={<UpdateBuyer />} />
             <Route path="buyerprofile" element={<BuyerProfile />} />
             <Route path="ownedlands" element={<OwnedLands />} />

@@ -39,7 +39,7 @@ const MakePayment = () => {
         const relevantLandIds = [];
         for (let i = 0; i < allRequests.length; i++) {
           const requestAddress = allRequests[i][1].toLowerCase();
-          if (requestAddress === account.toLowerCase()) {
+          if (requestAddress === account.toLowerCase() && allRequests[i][3]) {
             relevantLandIds.push(i + 1); // Add 1 because IDs start from 1
           }
         }
@@ -162,14 +162,23 @@ const MakePayment = () => {
                   Exchange Rate: ₹ 1 = 0.0000057 ETH
                 </p>
                 <button
-                onClick={() => navigate('/buyerDashboard')}
-                className="flex items-center text-white bg-white/10 hover:bg-white/20 rounded-lg px-4 py-2 transition-colors"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
-                </svg>
-                Return to Dashboard
-              </button>
+                  onClick={() => navigate("/buyerDashboard")}
+                  className="flex items-center text-white bg-white/10 hover:bg-white/20 rounded-lg px-4 py-2 transition-colors"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Return to Dashboard
+                </button>
               </div>
             </div>
           </div>
@@ -191,7 +200,7 @@ const MakePayment = () => {
                         Owner Address
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
-                        Price (in ETH)
+                        Price (in ₹)
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
                         Status
@@ -241,7 +250,7 @@ const MakePayment = () => {
                           </div>
                         </td>
                         <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">
-                          {land.price} ETH
+                          ₹{land.price}
                         </td>
                         <td className="px-4 py-4 whitespace-nowrap text-sm">
                           {land.isPaid ? (

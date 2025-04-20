@@ -2,6 +2,10 @@
 
 pragma solidity >= 0.5.2;
 contract Registry {
+    struct Coordinate {
+        int32 lat; // Latitude multiplied by 1e7 (e.g., 26.2551789 → 262551789)
+        int32 lng; // Longitude multiplied by 1e7
+    }
     struct Landreg {
         uint id;
         uint area;
@@ -12,6 +16,7 @@ contract Registry {
         uint physicalSurveyNumber;
         string ipfsHash;
         string document;
+        Coordinate[] boundary;
     }
 
     struct Buyer{
@@ -58,6 +63,8 @@ contract Registry {
     mapping(address => Buyer) public BuyerMapping;
     mapping(uint => LandRequest) public RequestsMapping;
 
+    mapping(uint => Coordinate[]) public landBoundaries;
+
     mapping(address => bool) public RegisteredAddressMapping;
     mapping(address => bool) public RegisteredSellerMapping;
     mapping(address => bool) public RegisteredBuyerMapping;
@@ -87,6 +94,7 @@ contract Registry {
     event requestApproved(address _buyerId);
     event Verified(address _id);
     event Rejected(address _id);
+    event BoundaryUpdated(uint indexed landId, uint coordinateCount);
 
     constructor() public{
         Land_Inspector = msg.sender ;
@@ -222,11 +230,33 @@ contract Registry {
         }
     }
 
-    function addLand(uint _area, string memory _city,string memory _state, uint landPrice, uint _propertyPID,uint _surveyNum,string memory _ipfsHash, string memory _document) public {
+    function addLand(uint _area, string memory _city,string memory _state, uint _landPrice, uint _propertyPID,uint _surveyNum,string memory _ipfsHash, string memory _document, int32[] memory _latitudes,
+        int32[] memory _longitudes) public {
         require((isSeller(msg.sender)) && (isVerified(msg.sender)));
+        require(_latitudes.length == _longitudes.length, "Coordinate arrays must match in length");
+        require(_latitudes.length >= 3, "Polygon must have at least 3 points");
         landsCount++;
-        lands[landsCount] = Landreg(landsCount, _area, _city, _state, landPrice,_propertyPID, _surveyNum, _ipfsHash, _document);
+        Landreg storage newLand = lands[landsCount];
+        newLand.id = landsCount;
+        newLand.area = _area;
+        newLand.city = _city;
+        newLand.state = _state;
+        newLand.landPrice = _landPrice;
+        newLand.propertyPID = _propertyPID;
+        newLand.physicalSurveyNumber = _surveyNum;
+        newLand.ipfsHash = _ipfsHash;
+        newLand.document = _document;
+        
+
+        for (uint i = 0; i < _latitudes.length; i++) {
+            newLand.boundary.push(Coordinate(_latitudes[i], _longitudes[i]));
+            landBoundaries[landsCount].push(Coordinate(_latitudes[i], _longitudes[i]));
+        }
+
         LandOwner[landsCount] = msg.sender;
+        
+                LandOwner[landsCount] = msg.sender;
+                 emit BoundaryUpdated(landsCount, _latitudes.length);
         // emit AddingLand(landsCount);
     }
 
@@ -348,7 +378,48 @@ contract Registry {
         PaymentReceived[_landId] = true;
         _receiver.transfer(msg.value);
     }
+function getLandBoundary(uint _landId) public view returns (int32[] memory, int32[] memory) {
+        require(_landId <= landsCount, "Invalid land ID");
+        
+        uint length = lands[_landId].boundary.length;
+        int32[] memory lats = new int32[](length);
+        int32[] memory lngs = new int32[](length);
+        
+        for (uint i = 0; i < length; i++) {
+            lats[i] = lands[_landId].boundary[i].lat;
+            lngs[i] = lands[_landId].boundary[i].lng;
+        }
+        
+        return (lats, lngs);
+    }
+    function getBoundaryPointCount(uint _landId) public view returns (uint) {
+        return lands[_landId].boundary.length;
+    }
+    function updateLandBoundary(
+        uint _landId,
+        int32[] memory _latitudes,
+        int32[] memory _longitudes
+    ) public {
+        require(_landId <= landsCount, "Invalid land ID");
+        require(
+            msg.sender == LandOwner[_landId] || isLandInspector(msg.sender),
+            "Not authorized"
+        );
+        require(_latitudes.length == _longitudes.length, "Coordinate arrays must match");
+        require(_latitudes.length >= 3, "Polygon must have at least 3 points");
 
+        // Clear existing boundary
+        delete lands[_landId].boundary;
+        delete landBoundaries[_landId];
+
+        // Add new coordinates
+        for (uint i = 0; i < _latitudes.length; i++) {
+            lands[_landId].boundary.push(Coordinate(_latitudes[i], _longitudes[i]));
+            landBoundaries[_landId].push(Coordinate(_latitudes[i], _longitudes[i]));
+        }
+
+        emit BoundaryUpdated(_landId, _latitudes.length);
+    }
 
 
 }

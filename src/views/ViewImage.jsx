@@ -23,7 +23,7 @@ const ViewImage = () => {
   const navigate = useNavigate();
 
   // Contract address should be in config
-  const contractAddress = "0x20c436af289adc0dbbf05c79caa11612ed20ef27";
+  const contractAddress = "0x7906632B036f9D1E63FFdcb4EB1317880D06D799";
 
   // Get land details helper function
   const getLandDetails = async (contract, id) => {
@@ -123,18 +123,23 @@ const ViewImage = () => {
             Survey No.: {land.surveyNumber}
           </p>
           <div className="border-t pt-3">
-            <p className="text-lg font-semibold">Price: {land.price} ETH</p>
-            <p className="mt-2">
-              View Verified Land{" "}
+            <p className="text-lg font-semibold">Price: ₹{land.price}</p>
+            <div className="mt-2  space-x-2">
               <a
                 href={land.document}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-500 hover:underline"
               >
-                Document
+                View Document
               </a>
-            </p>
+            </div>
+            <Link
+              to={`/sellerdashboard/viewImage/${land.id}/map`}
+              className="text-blue-500 hover:underline"
+            >
+              View on Map
+            </Link>
           </div>
         </div>
       </div>

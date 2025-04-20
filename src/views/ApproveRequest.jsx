@@ -39,6 +39,7 @@ const ApproveRequest = () => {
             // Check if current user is the land owner
             if (currentAddress.toLowerCase() === request[0].toLowerCase()) {
               idx++;
+              console.log(request[2].toString());
               userRequests.push({
                 id: idx,
                 originalId: i,
@@ -52,7 +53,7 @@ const ApproveRequest = () => {
             console.error(`Error fetching request #${i}:`, error);
           }
         }
-
+        console.log(userRequests);
         setRequests(userRequests);
       } catch (error) {
         console.error("Error loading request data:", error);
@@ -130,26 +131,53 @@ const ApproveRequest = () => {
 
         {/* Processing overlay */}
         {processingTx && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-xl text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-            <p className="mt-4 text-lg font-medium text-gray-700">
-              Processing transaction...
-            </p>
-            <p className="text-sm text-gray-500">
-              Please wait while the blockchain confirms your action.
-            </p>
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg shadow-xl text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+              <p className="mt-4 text-lg font-medium text-gray-700">
+                Processing transaction...
+              </p>
+              <p className="text-sm text-gray-500">
+                Please wait while the blockchain confirms your action.
+              </p>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
-        <div className="p-6 bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center">
-              <div className="bg-white/20 p-3 rounded-lg mr-4">
+          <div className="p-6 bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center">
+                <div className="bg-white/20 p-3 rounded-lg mr-4">
+                  <svg
+                    className="h-6 w-6 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold">Purchase Requests</h2>
+                  <p className="text-blue-100 mt-1">
+                    Review and approve requests from potential buyers
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => navigate("/sellerDashboard")}
+                className="flex items-center text-white bg-white/10 hover:bg-white/20 rounded-lg px-4 py-2.5 transition-colors"
+              >
                 <svg
-                  className="h-6 w-6 text-white"
+                  className="h-5 w-5 mr-2"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -159,40 +187,13 @@ const ApproveRequest = () => {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth="2"
-                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                    d="M11 17l-5-5m0 0l5-5m-5 5h12"
                   />
                 </svg>
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold">Purchase Requests</h2>
-                <p className="text-blue-100 mt-1">
-                  Review and approve requests from potential buyers
-                </p>
-              </div>
+                Return to Dashboard
+              </button>
             </div>
-
-            <button
-              onClick={() => navigate("/sellerDashboard")}
-              className="flex items-center text-white bg-white/10 hover:bg-white/20 rounded-lg px-4 py-2.5 transition-colors"
-            >
-              <svg
-                className="h-5 w-5 mr-2"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M11 17l-5-5m0 0l5-5m-5 5h12"
-                />
-              </svg>
-              Return to Dashboard
-            </button>
-        </div>
-      </div>
+          </div>
 
           <div className="p-6">
             <div className="overflow-x-auto">
@@ -336,10 +337,11 @@ const ApproveRequest = () => {
                           <button
                             onClick={() => approveRequest(request.originalId)}
                             disabled={request.approved}
-                            className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${request.approved
+                            className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                              request.approved
                                 ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                                 : "bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-sm hover:shadow"
-                              }`}
+                            }`}
                           >
                             {request.approved ? (
                               <>
