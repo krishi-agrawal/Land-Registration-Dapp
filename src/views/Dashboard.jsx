@@ -215,7 +215,7 @@ const Dashboard = () => {
           {/* Add View on Map button */}
           <div className="mb-3">
             <Link
-              to={`/buyerdashboard/${land.id}/map`}
+              to={`/buyerdashboard/${land.originalId}/map`}
               className="w-full flex items-center justify-center py-2 px-4 rounded-lg font-medium bg-green-600 hover:bg-green-700 text-white shadow-sm transition-colors"
             >
               <svg
