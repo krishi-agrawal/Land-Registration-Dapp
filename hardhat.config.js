@@ -25,14 +25,14 @@ if (!privateKey) {
 }
 
 module.exports = {
-  solidity: "0.8.4",
+  solidity: "0.5.17",
   settings: {
     optimizer: {
       enabled: true,
       runs: 1000,
     },
   },
-  defaultNetwork: "hardhat",
+  defaultNetwork: "sepolia",
   networks: {
     hardhat: {},
     sepolia: {
