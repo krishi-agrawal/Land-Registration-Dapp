@@ -1,4 +1,7 @@
-# 🏡 Decentralized Land Registration System
+<div align="center">
+    <img src="/public/logo.jpg" height="120px"/>
+    <h1> Decentralized Land Registration System </h1>
+</div>
 
 A blockchain-based solution to revolutionize land ownership verification, transfer, and management using Ethereum smart contracts, IPFS document storage, and interactive map visualization.
 
@@ -48,6 +51,23 @@ Our decentralized application addresses these challenges through:
 6. **Payment**: Buyers make payment through the platform
 7. **Verification**: Land inspectors verify the payment and transaction
 8. **Ownership Transfer**: Upon verification, property ownership is automatically transferred
+
+## Preview
+- **Landing Page**
+   <img src="public/Screenshot 2025-04-20 123659.png" />
+   </br> 
+- **Verify Buyer**
+   <img src="public/Screenshot 2025-04-20 123935.png" />
+   </br> 
+- **Add New Land**
+   <img src="public/Screenshot 2025-04-20 125618.png" />
+   </br> 
+- **Map** 
+   <img src="public/Screenshot 2025-04-22 222034.png" />
+   </br> 
+- **Request Land**
+<img src="public/Screenshot 2025-04-22 222742.png" />
+
 
 ## 🛠️ Technology Stack
 
